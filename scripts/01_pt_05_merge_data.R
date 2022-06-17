@@ -12,7 +12,10 @@ nominees_pt <- full_join(books_df, reviews_gndr_df, by = "url_book") |>
   group_by(url_book) |>
   mutate(revs_fem = round(sum(rev_gndr == "F") / revs_n, 2)) |>
   filter(row_number() == 1) |>
-  ungroup() |>
+  
+  # calculate number of books in total and for prize on PT
+  group_by(url_name) |> 
+  mutate(books_pt_n = n()) |> #,books_pt_prev = sum(year_ypub < ynom) -> TODO: for each prize
 
   # create match id for join with prices (separate books with multiple authors)
   separate_rows(url_name, sep = ";") |>
@@ -36,25 +39,22 @@ nominees_pt <- full_join(books_df, reviews_gndr_df, by = "url_book") |>
   full_join(prizes_df, by = "match_id", suffix = c(".pt", ".xlsx")) |>
 
   mutate(no_pt = is.na(url_book),
+         authors = ifelse(is.na(authors), name, authors),
          title = ifelse(is.na(title.pt), title.xlsx, title.pt),
          subti = ifelse(is.na(subti.pt), subti.xlsx, subti.pt),
          publisher = ifelse(is.na(publisher.pt), publisher.xlsx, publisher.pt),
+         url_name = ifelse(is.na(url_name.pt), url_name.xlsx, url_name.pt),
          age_nom = ynom - ybirth, # age in year of nomination
-         url_name = url_name.pt,
          debut = prize %in% c("oesterreich_debuet", "aspekte")) |> 
 
   # keep just nominees (drop all books by authors who have not been nominated)
-  filter(!is.na(prize)) #|> 
-  
-test <- filter(nominees, match_id.x != match_id.y) |> select(starts_with("match_id"))
-
-# check why different match_ids!???!?!
+  filter(!is.na(prize)) |> 
 
   select(authors, title, subti, prize, ynom, shortlist, winner, debut,
-         ypub, publisher, pub_place, authors_n,
+         ypub, publisher, pub_place, authorsn,
          tags, tpcs, tags_n, tpcs_n, revs_n, revs_fem,
          female, ybirth, ydeath, age_nom, academic, institute, language,
-         url_name, url_book, match_id, no_pt)
+         url_name, url_book, match_id, no_pt, books_pt_n)
 
 
 saveRDS(nominees_pt, "../data/nominees_pt.RDS")
