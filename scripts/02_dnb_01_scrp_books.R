@@ -13,8 +13,7 @@ authors_dnb <- readRDS("../data/pt_prizes.RDS") |>
   # shorten names (otherwise not found at DND) -> change back later
   str_replace("Altwasser, Volker Harry", "Altwasser, Volker") |>
   str_replace("Cole, Isabel Fargo", "Cole, Isabel") |>
-  str_replace("Salzmann, Sasha Marianna", "Salzmann, Marianna") |>
-  append("Salzmann, Sasha Marianna") # found one book only with full name
+  append("Salzmann, Marianna") # same as original: Salzmann, Sasha Marianna
 
 
 
