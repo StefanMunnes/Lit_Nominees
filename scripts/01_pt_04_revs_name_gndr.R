@@ -39,7 +39,7 @@ names.short <- names.raw[(!grepl("<", names.raw$name) &
 # nur Namen behalten, die wenigstens in 2 Ländern vorkommen oder eine summierte Relevanz von 4 haben
 names.short <- names.short[( names.short$freq > 1 | names.short$sum > 3), 2:3]
 
-# Namen mit "+" berenigen, entweder Bindestrich oder ohne Leerzeichen
+# Namen mit "+" bereinigen, entweder Bindestrich oder ohne Leerzeichen
 names.dash <- names.short[grepl("\\+", names.short$name),]
 names.dash$name <- gsub("\\+", "-", names.dash$name)
 
