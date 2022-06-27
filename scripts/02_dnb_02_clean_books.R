@@ -65,7 +65,7 @@ dnb_books_all <- readRDS("../data/dnb_books_raw.RDS") |>
                        TRUE ~ author),
 
     # first letter of each part of name in uppercase
-    auhor = str_to_title(author),
+    author = str_to_title(author),
 
     # NA for author_id if NOID wildcard (keep right order for spliting contribs)
     author_id = ifelse(author_id == "NOID", NA, author_id),
@@ -73,7 +73,7 @@ dnb_books_all <- readRDS("../data/dnb_books_raw.RDS") |>
     # create correct ID for later scrape purpose
     author_id = str_remove_all(author_id, "\\(DE-588\\)")
   ) |>
-
+  
 
   ### 2 keep just observations with same author name as search name (separated co-authors)
   filter(author_search == author) |> # was checked manually if names just vary slightly
