@@ -9,30 +9,28 @@ prizes <- c(
 prizes_raw_ls <- lapply(paste0("../data/prizes_xlsx/", prizes, "_buchpreis.xlsx"), read_xlsx)
 names(prizes_raw_ls) <- prizes
 
-prizes_raw <- bind_rows(prizes_raw_ls, .id = "Preis") %>%
+prizes_raw <- bind_rows(prizes_raw_ls, .id = "Preis") |>
   select(!contains("Quelle"))
 
 
 
 # ---- 2. load and clean different formated deutscher Buchpreis sepratly ----
-dbp_raw <- read_xlsx("../data/prizes_xlsx/deutscher_buchpreis.xlsx", skip = 3) %>%
-  separate_rows(Gewonnen, Shortlist, Longlist, sep = "; ") %>%
+dbp_raw <- read_xlsx("../data/prizes_xlsx/deutscher_buchpreis.xlsx", skip = 3) |>
+  separate_rows(Gewonnen, Shortlist, Longlist, sep = "; ") |>
   # produce some duplicates if books in multiple columns in excel
   pivot_longer(c(Gewonnen, Shortlist, Longlist),
     names_to = "Shortlist", values_to = "book",
-    values_drop_na = T
-  ) %>%
-  unique() %>%
+    values_drop_na = TRUE
+  ) |>
+  unique() |>
   mutate(
     Name = str_replace(Name, "(.+)(,\\ )(.+)", "\\3 \\1"),
     Geburtsjahr = ifelse(Geburtsdatum > 2020,
-      as.Date(Geburtsdatum, "1899-12-30") %>%
-        format("%Y") %>% as.numeric(),
+      as.Date(Geburtsdatum, "1899-12-30") |> format("%Y") |> as.numeric(),
       Geburtsdatum
     ),
     Sterbejahr = ifelse(Sterbedatum > 2020,
-      as.Date(Sterbedatum, "1899-12-30") %>%
-        format("%Y") %>% as.numeric(),
+      as.Date(Sterbedatum, "1899-12-30") |> format("%Y") |> as.numeric(),
       Sterbedatum
     ),
     Muttersprache = str_replace_all(Muttersprache, "[ (?)]", ""),
@@ -41,16 +39,16 @@ dbp_raw <- read_xlsx("../data/prizes_xlsx/deutscher_buchpreis.xlsx", skip = 3) %
     Titel = str_replace(book, "([0-9 ]*\\()(.*)(\\))", "\\2"),
     Gewonnen = ifelse(Shortlist == "Gewonnen", "ja", "nein"),
     Shortlist = ifelse(Shortlist == "Longlist", "nein", "ja"),
-    Verlag = ifelse(str_detect(Verlag, Jahr), Verlag, Verlag2) %>%
+    Verlag = ifelse(str_detect(Verlag, Jahr), Verlag, Verlag2) |>
       str_replace("[[:space:]]\\([0-9,; ]+\\)", ""),
     Jahr = as.numeric(Jahr),
     Preis = "deutscher"
-  ) %>%
+  ) |>
   select(!c(Verlag2, Geburtsdatum, Sterbedatum, book))
 
 
 # ---- 3. combine all prizes togeher and rename and recode variables ----
-prizes_df <- bind_rows(prizes_raw, dbp_raw) %>%
+prizes_df <- bind_rows(prizes_raw, dbp_raw) |>
   rename(
     name = Name,
     female = Geschlecht,
@@ -85,6 +83,7 @@ prizes_df <- prizes_df |>
     c(shortlist, academic, institute, winner),
     ~ ifelse(str_detect(.x, "[jJ]a"), TRUE, FALSE)
   ),
+  institute = case_when(name == "Carmen Buttjer" ~ FALSE, TRUE ~ institute),
   female = ifelse(female == "w", TRUE, FALSE),
   prize = as.factor(prize),
   shortlist = ifelse(prize %in% c(
@@ -96,7 +95,12 @@ prizes_df <- prizes_df |>
     str_detect(language, "Deutsch") ~ "german",
     !str_detect(language, "Deutsch") &
       !str_detect(language, "/") ~ "foreign",
-    !str_detect(language, "Deutsch") ~ "foreign+"
+    !str_detect(language, "Deutsch") ~ "foreign+",
+    # manually add language for 2 authors
+    # https://www.amazon.de/Levi-Roman-Carmen-Buttjer/dp/3442718007
+    str_detect(name, "Carmen Buttjer") ~ "german+",
+    # https://www.srf.ch/kultur/literatur/tuerken-in-deutschland-ich-lebte-in-zwei-parallelen-welten
+    str_detect(name, "Cihan Acar") ~ "german+"
   ),
   language = as.factor(language)
   ) |>
@@ -137,6 +141,14 @@ prizes_df <- prizes_df |>
       title == "Laura" ~ " oder die Tücken der Kunst; Roman",
       TRUE ~ subti
     ),
+    # manually add ybirth
+    ybirth = case_when(
+      # https://www.perlentaucher.de/autor/carmen-buttjer.html
+      name == "Carmen Buttjer" ~ 1988,
+      # https://www.derstandard.at/story/2000119066256/gunther-neumanneine-betonwand-vis-a-vis-waere-fuer-mich-schwierig
+      name == "Gunther Neumann" ~ 1958,
+      TRUE ~ ybirth
+    ),
     title = str_squish(title),
     url_name = clean(name),
     match_id = cr_match_id(url_name, title)
@@ -145,8 +157,9 @@ prizes_df <- prizes_df |>
   filter(name != "Nanne Meyer")
 
 
+
 # print and stop if inconsistent informations for each authors
-test <- group_by(prizes_df, prize, ynom, match_id) %>%
+test <- group_by(prizes_df, prize, ynom, match_id) |>
   filter(n() > 1)
 
 if (nrow(test) > 0) {
