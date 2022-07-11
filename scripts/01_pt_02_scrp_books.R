@@ -21,7 +21,8 @@ books_htmls <- lapply(authors_url, function(name) {
 
   tryCatch(
     {
-      paste0("https://www.perlentaucher.de/autor/", name, ".html") %>% read_html()
+      paste0("https://www.perlentaucher.de/autor/", name, ".html") |>
+        read_html()
     },
     error = function(e) NULL
   )
@@ -51,7 +52,7 @@ books_df2 <- bind_rows(books_ls, .id = "url_name") %>%
   separate(header, c("authors", "work"),
     sep = ":", extra = "merge", fill = "right"
   ) %>%
-  # deal with extra commas to avoid erros with later separate by comma
+  # deal with extra commas to avoid errors with later separation by comma
   mutate(
     subline = sub("Basel, Weil", "Basel/Weil", subline),
     subline = sub("Klöpfer, Narr", "Klöpfer/Narr", subline)
