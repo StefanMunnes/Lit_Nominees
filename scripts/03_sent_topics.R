@@ -7,7 +7,7 @@ path_shiny <- "../data/shiny_handcoding/data/"
 shiny_raw <- lapply(c("01", "02", "03"), function(dir) {
   files <- list.files(
     path = paste0(path_shiny, dir),
-    pattern = ".csv", full.names = T
+    pattern = ".csv", full.names = TRUE
   )
 
   lapply(files, function(file) {
@@ -64,8 +64,10 @@ sent_topics <- left_join(shiny_raw, revs_book_url, by = "text") |>
   ) |>
   # manually set topic from two separate books with same title (diff in URL) and remove wrong book
   mutate(topics_orig = ifelse(Nr. == 680, "DDR;Familie;Kommunismus", topics_orig)) |>
-  filter(url_book != "/buch/birk-meinhardt/brueder-und-schwestern-die-jahre-1989-2001-roman-2017.html" &
-    url_book != "/buch/thomas-glavinic/der-jonas-komplex.html") |>
+  filter(
+    url_book != "/buch/birk-meinhardt/brueder-und-schwestern-die-jahre-1989-2001-roman-2017.html" &
+      url_book != "/buch/thomas-glavinic/der-jonas-komplex.html"
+  ) |>
   # calculate mean sentiment
   group_by(url_book) |>
   mutate(senti_mean = round(mean(Sentiment, na.rm = T), 2)) |>
@@ -96,12 +98,27 @@ sent_topics <- left_join(shiny_raw, revs_book_url, by = "text") |>
     topic_identity = str_detect(topics_tmp, "\\bD\\b"),
     topic_culture = str_detect(topics_tmp, "\\bF\\b")
   ) |>
-  # for topics with multiple (different raters) categories: keep if at least 50% same
+  # if multiple raters, keep three topics with highest agreement *larger zero*
+  # JV: 4 books lose topics
+  #     Apostoloff                      C;A;D     2
+  #     Annette, ein Heldinnenepos      Epos;A;B  1
+  #     Ambra                           C;A;A     1
+  #     Am Ende schmeißen wir mit Gold  D;F       0
   group_by(url_book) |>
-  mutate(across(starts_with("topic_"), ~ mean(.x) >= .5)) |>
+  # mutate(across(starts_with("topic_"), ~ mean(.x) >= .5)) |>
+  mutate(
+    across(
+      starts_with("topic_"),
+      ~ mean(.x) %in% subset(.x, !. %in% c(0, NA)) |>
+        sort(decreasing = TRUE) |>
+        unique() |>
+        head(3)
+    )
+  ) |>
   mutate(topics_orig = paste(topics_orig, collapse = "|")) |>
   filter(row_number() == 1) |>
   ungroup() |>
+  # mutate(topics_n = select(., starts_with("topic_")) |> rowSums()) |>
   select(
     title, url_book, revs_n_st, revs_n_nomis_st, rater_n_st,
     senti_mean, starts_with("topic_"), topics_orig
@@ -124,3 +141,8 @@ saveRDS(sent_topics, "../data/sentiment_topics.RDS")
 #   group_by_all() |>
 #   summarize(n = n()) |>
 #   arrange(thema, desc(n))
+
+# # delete in final code
+# sent_topics |>
+#   filter(topics_n < 3, topics_tmp |> str_detect("[A:F]")) |>
+#   View()
