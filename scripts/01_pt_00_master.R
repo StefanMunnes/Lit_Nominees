@@ -10,8 +10,13 @@ pacman::p_load(
   "rvest", # read_html(), html_nodes(), html_text()
   "purrr", # keep()
   "ggplot2",
-  "rdnb", "httr", "xml2"
-) # Deutsche Nationalbibliothek
+  "rdnb", # Deutsche Nationalbibliothek
+  "httr",
+  "xml2",
+  "wikipediatrend", # Wikidata
+  "lubridate", # interval
+  "fuzzyjoin"  # regex_full_join
+)
 
 
 # create function to clean names
