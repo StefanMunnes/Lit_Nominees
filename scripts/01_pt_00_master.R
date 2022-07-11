@@ -13,9 +13,10 @@ pacman::p_load(
   "rdnb", # Deutsche Nationalbibliothek
   "httr",
   "xml2",
+  "jsonlite", # fromJSON
   "wikipediatrend", # Wikidata
   "lubridate", # interval
-  "fuzzyjoin"  # regex_full_join
+  "fuzzyjoin" # regex_full_join
 )
 
 
