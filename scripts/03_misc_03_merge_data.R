@@ -16,64 +16,71 @@ jury <- read_xlsx("../data/prizes_xlsx/Jury_allprices.xlsx") %>%
 
 # load dnb books (for books before nomination)
 dnb_books <- readRDS("../data/dnb_books_prize.RDS") |>
-  select(match_id, title_dnb, year_dnb, keyword_dnb) |> 
-  mutate(url_name = str_replace(match_id, "(.*?)_.+", "\\1")) |> 
+  select(match_id, title_dnb, year_dnb, keyword_dnb) |>
+  mutate(url_name = str_replace(match_id, "(.*?)_.+", "\\1")) |>
   select(!match_id)
 
+# load wikipedia data
+wiki_data_pre <- readRDS("../data/wikidata_pre.RDS")
 
-nominees <- nominees_pt |> 
-  
+
+
+nominees <- nominees_pt |>
   # 1. add sentiment and topics
   full_join(sent_topics, by = "url_book", suffix = c("_pt", "_st")) |>
-  mutate(no_prize = is.na(prize),
-         no_senttop = is.na(senti_mean)) |>
-
+  mutate(
+    no_prize = is.na(prize),
+    no_senttop = is.na(senti_mean)
+  ) |>
   # 12x no prize with coded sent/topics
   # 43x no sent/topics (2x with pt-revs, 41 without pt-revs)
 
   filter(!no_prize) |>
-
-  
   # 2. add gender share of jury
   left_join(jury, by = c("ynom", "prize")) |>
-
-  
   # 3. add publisher reputation
-  mutate(publisher = case_when(publisher == "Hanser Berlin" ~ "Carl Hanser Verlag",
-                               publisher == "Rowohlt Berlin Verlag" ~ "Rowohlt Verlag",
-                               publisher == "Matthes und Seitz Berlin" ~ "Matthes und Seitz",
-                               publisher == "Galiani Verlag" ~ "Galiani Verlag Berlin",
-                               TRUE ~ publisher)) |>
+  mutate(publisher = case_when(
+    publisher == "Hanser Berlin" ~ "Carl Hanser Verlag",
+    publisher == "Rowohlt Berlin Verlag" ~ "Rowohlt Verlag",
+    publisher == "Matthes und Seitz Berlin" ~ "Matthes und Seitz",
+    publisher == "Galiani Verlag" ~ "Galiani Verlag Berlin",
+    TRUE ~ publisher
+  )) |>
   left_join(publisher, by = "publisher") |>
-  rename(pub_reputation = reputation,
-         pub_reputation_mean = mean_reputation) |>
-
-  
+  rename(
+    pub_reputation = reputation,
+    pub_reputation_mean = mean_reputation
+  ) |>
   # 4. number of books before nomination (by list of DNB books)
   full_join(dnb_books, by = "url_name") |>
   group_by(url_name, prize, ynom) |>
-  mutate(books_dnb_n = n(),
-         books_dnb_prev = sum(year_dnb < ynom),
-         no_dnb = is.na(title_dnb)) |>
-    
+  mutate(
+    books_dnb_n = n(),
+    books_dnb_prev = sum(year_dnb < ynom),
+    no_dnb = is.na(title_dnb)
+  ) |>
   filter(row_number() == 1) |>
-    
-
   # 5. times of nomination and previous nominations for each author and prize
-  group_by(url_name, prize) |>
+  group_by(url_name, prize) |> # MK: Why group by prize?
   arrange(ynom) |>
-  mutate(nom_prize_n = n(),
-         nom_prize_prev = row_number() > 1) |>
+  mutate(
+    nom_prize_n = n(),
+    nom_prize_prev = row_number() > 1
+  ) |>
   ungroup() |>
-
-  select(authors, title_pt, subti, prize, ynom, shortlist, winner, debut, 
-         jury_fem, nom_prize_n, nom_prize_prev,
-         ybirth, ydeath, age_nom, female, language, academic, institute,
-         revs_n, revs_fem, revs_n_nomis_st, senti_mean,
-         books_dnb_n, books_dnb_prev, books_pt_n,
-         ypub, publisher, pub_place, starts_with("pub_rep"), # pages, price, type, isbn,
-         tags, tpcs, keyword_dnb, starts_with("topic_"), topics_orig,
-         url_name, url_book, match_id, no_pt, no_senttop)
+  # 6. Add Wikipedia Views
+  left_join(wiki_data_pre) |>
+  select(
+    authors, title_pt, subti, prize, ynom, shortlist, winner, debut,
+    jury_fem, nom_prize_n, nom_prize_prev,
+    ybirth, ydeath, age_nom, female, language, academic, institute,
+    revs_n, revs_fem, revs_n_nomis_st, senti_mean,
+    books_dnb_n, books_dnb_prev, books_pt_n,
+    ypub, publisher, pub_place, starts_with("pub_rep"), # pages, price, type, isbn,
+    tags, tpcs, keyword_dnb, starts_with("topic_"), topics_orig,
+    views_pre, shortlist_date, longlist_date, interval,
+    url_name, url_book, match_id, no_pt, no_senttop
+  )
 
 
 saveRDS(nominees, file = "../data/nominees.RDS")
