@@ -1,26 +1,28 @@
 
-# load prepared nominee data from perlentaucher (prizes + books + reviews)
+# ---- 1. load necessary data ----
+
+# prepared nominee data from perlentaucher (prizes + books + reviews)
 nominees_pt <- readRDS("../data/nominees_pt.RDS")
 
 # lod sentiment and topics
 sent_topics <- readRDS("../data/sentiment_topics.RDS")
 
-# load Publisher Information
+# Publisher Information
 publisher <- read.csv("../data/publisherstatus/publisherstatus_new.csv", encoding = "UTF-8")
 
-# load Jury Information
+# Jury Information
 jury <- read_xlsx("../data/prizes_xlsx/Jury_allprices.xlsx") %>%
   group_by(ynom, prize) %>%
   mutate(jury_fem = round(sum(Jury_F) / sum(Jury_F, Jury_M), 2)) %>%
   select(ynom, prize, jury_fem)
 
-# load dnb books (for books before nomination)
+# dnb books (for books before nomination)
 dnb_books <- readRDS("../data/dnb_books_prize.RDS") |>
   select(match_id, title_dnb, year_dnb, keyword_dnb) |>
   mutate(url_name = str_replace(match_id, "(.*?)_.+", "\\1")) |>
   select(!match_id)
 
-# load wikipedia data
+# wikipedia data
 wiki_data_pre <- readRDS("../data/wikidata_pre.RDS")
 
 
