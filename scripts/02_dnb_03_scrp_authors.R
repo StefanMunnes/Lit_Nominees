@@ -44,6 +44,38 @@ dnb_authors_ls <- lapply(dnb_authors_ids, function(id) {
 
 names(dnb_authors_ls) <- dnb_authors_ids
 
-dnb_authors_df <- bind_rows(dnb_authors_ls, .id = "author_id")
+dnb_authors_df <- bind_rows(dnb_authors_ls, .id = "author_id") |>
+  mutate(across(c(wikipedia, wikidata), ~ na_if(.x, "")))
+
+
+# ---- 1.2  get missing wikipedia links from wikidata ----
+wiki_miss <- filter(dnb_authors_df, is.na(wikipedia) & !is.na(wikidata))
+#|> mutate(wikidata = ifelse())
+
+# https://www.wikidata.org/wiki/Q112533155
+
+wiki_miss_new <- lapply(wiki_miss$wikidata, function(url) {
+  message(url)
+
+  json <- GET(paste0(url, ".json")) |>
+    content(as = "text") |>
+    fromJSON()
+
+  wikipedia <- json[[1]][[1]]$sitelinks$dewiki$url
+
+  data.frame(
+    wikidata = url,
+    wikipedia_new = ifelse(is_empty(wikipedia), NA, wikipedia)
+  )
+}) |>
+  bind_rows() |>
+  filter(!is.na(wikipedia_new))
+
+
+# ---- 1.3 add missing wikipedia links to first data.frame -----
+dnb_authors_df <- full_join(dnb_authors_df, wiki_miss_new, by = "wikidata") |>
+  mutate(wikipedia = ifelse(is.na(wikipedia), wikipedia_new, wikipedia)) |>
+  select(!wikipedia_new)
+
 
 saveRDS(dnb_authors_df, file = "../data/dnb_authors.RDS")
