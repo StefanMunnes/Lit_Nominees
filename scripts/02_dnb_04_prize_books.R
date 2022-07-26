@@ -2,6 +2,7 @@
 # load data
 prizes_df <- readRDS("../data/pt_prizes.RDS")
 dnb_books_all <- readRDS("../data/dnb_books_all.RDS")
+dnb_authors_all <- readRDS("../data/dnb_authors.RDS")
 
 # ---- 1. merge nominees with DNB data for correct author ID (and filter correct book) ----
 prizes_dnb_unique <- left_join(prizes_df, dnb_books_all, by = c("match_id")) |>
@@ -45,7 +46,8 @@ prizes_authors_id <- prizes_dnb_unique |>
 
 
 # ---- 3. filter DNB authors by correct ID from list of books of prizes ----
-dnb_books_prize <- full_join(dnb_books_all, prizes_authors_id, by = "author_search") |>
+dnb_books_prize <- dnb_books_all |>
+  full_join(prizes_authors_id, by = "author_search") |>
   # even authors with same name and book title -> different IDs
   # get all IDs for authors (checked later and removed three errors)
   group_by(match_id) |>
@@ -264,6 +266,8 @@ dnb_books_prize <- full_join(dnb_books_all, prizes_authors_id, by = "author_sear
   mutate(title_variants = sum(title_variants)) |> # add all title-variantes togehter
   filter(row_number() == 1) |>
   ungroup() |>
+  # add author information from DNB (wikipedia/wikidata infos)
+  left_join(dnb_authors_all, by = "author_id") |>
   # rename and select necessary columns
   rename(url_book_dnb = link) |>
   rename_with(
@@ -275,7 +279,7 @@ dnb_books_prize <- full_join(dnb_books_all, prizes_authors_id, by = "author_sear
   ) |>
   select(
     author, ends_with("_dnb"), match_id,
-    author_id_dnb, url_book_dnb, title_variants_dnb, name
+    author_id_dnb, url_book_dnb, title_variants_dnb, name, wikipedia, wikidata
   )
 
 
