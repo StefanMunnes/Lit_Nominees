@@ -19,6 +19,7 @@ pacman::p_load(
   "fuzzyjoin" # regex_full_join
 )
 
+try(setwd("scripts/"))
 
 # create function to clean names
 clean <- function(var) {
