@@ -23,11 +23,22 @@ shiny_raw <- lapply(c("01", "02", "03"), function(dir) {
 
 
 
-# ---- 2. clean raw shiny data ----
+# ---- 2. load further data to keep just reviews before prize ----
 
-# load review data to get book url by review text
+nominees_pt <- readRDS("../data/nominees_pt.RDS") |>
+  select(url_book, prize, ynom) |>
+  na.omit() # remove books with no book url -> no pt -> no sentiment
+
+# date of nomination, prize receipt and ceremony
+dates <- read_xlsx("../data/preise_daten.xlsx") |>
+  select(prize, ynom, winner_announced)
+
+# load review data to get book url by review text and add prize and date
 revs_book_url <- readRDS("../data/pt_reviews.RDS") |>
-  select(text, url_book)
+  select(text, url_book, date) |>
+  inner_join(nominees_pt, by = "url_book") |>
+  inner_join(dates, by = c("prize", "ynom"))
+
 
 # dictionary for reduction of open codes to more generalized
 codes <- read_excel(path = "../data/themen_all.xlsx", sheet = 1) |>
@@ -37,8 +48,12 @@ codes <- read_excel(path = "../data/themen_all.xlsx", sheet = 1) |>
   mutate(original = str_remove_all(original, "[ ()-]"))
 
 
-# join review data.frame by text to get unique book url for possible duplicates by title
-sent_topics <- left_join(shiny_raw, revs_book_url, by = "text") |>
+
+# ---- 2. clean raw shiny data ----
+
+# join review data by text to get unique book url (possible duplicates by title)
+# inner_join: remove books/sentiments with no prize (13/38) & 8x no hand coding
+sent_topics <- inner_join(shiny_raw, revs_book_url, by = "text") |>
   # get rater number from file name & prepare sentiment and topic
   mutate(
     rater = str_sub(file, -7, -7),
@@ -57,23 +72,34 @@ sent_topics <- left_join(shiny_raw, revs_book_url, by = "text") |>
   mutate(
     Sentiment =
       case_when(
-        str_detect(text, "(Doppel|Mehrfach|Sammel)(besprechung|rezension)") ~ NA_integer_,
-        str_detect(text, "(bespricht|besprechen)\\s(zwei|drei)\\s") ~ NA_integer_,
+        str_detect(
+          text,
+          "(Doppel|Mehrfach|Sammel)(besprechung|rezension)"
+        ) ~ NA_integer_,
+        str_detect(
+          text,
+          "(bespricht|besprechen)\\s(zwei|drei)\\s"
+        ) ~ NA_integer_,
         TRUE ~ Sentiment
       )
   ) |>
-  # manually set topic from two separate books with same title (diff in URL) and remove wrong book
-  mutate(topics_orig = ifelse(Nr. == 680, "DDR;Familie;Kommunismus", topics_orig)) |>
-  filter(
-    url_book != "/buch/birk-meinhardt/brueder-und-schwestern-die-jahre-1989-2001-roman-2017.html" &
-      url_book != "/buch/thomas-glavinic/der-jonas-komplex.html"
+  # manually set topic from two separate books with same title (diff in URL)
+  mutate(topics_orig = ifelse(
+    title == "Brüder und Schwestern",
+    "DDR;Familie;Kommunismus",
+    topics_orig
+  )) |>
+  # mark if review was later than price announcement (435 ~ 15%)
+  mutate(
+    rev_later = date > winner_announced,
+    Sentiment = ifelse(rev_later, NA, Sentiment) # Sent to NA if rev was later
   ) |>
-  # calculate mean sentiment
-  group_by(url_book) |>
+  # calculate mean sentiment: group also by prize & year
+  group_by(url_book, prize, ynom) |>
   mutate(senti_mean = round(mean(Sentiment, na.rm = T), 2)) |>
   # keep just the one observation per rater with topic included
   # can't just filter over NA; sometimes topics missing, keep at least one row
-  group_by(url_book, rater) |>
+  group_by(url_book, rater, prize, ynom) |>
   mutate(
     revs_n_st = n(),
     revs_n_nomis_st = sum(!is.na(Sentiment))
@@ -81,7 +107,7 @@ sent_topics <- left_join(shiny_raw, revs_book_url, by = "text") |>
   arrange(topics_orig) |>
   filter(row_number() == 1) |>
   # calculate number of raters
-  group_by(url_book) |>
+  group_by(url_book, prize, ynom) |>
   mutate(rater_n_st = n()) |>
   ungroup() |>
   # categorize topics
@@ -104,7 +130,7 @@ sent_topics <- left_join(shiny_raw, revs_book_url, by = "text") |>
   #     Annette, ein Heldinnenepos      Epos;A;B  1
   #     Ambra                           C;A;A     1
   #     Am Ende schmeißen wir mit Gold  D;F       0
-  group_by(url_book) |>
+  group_by(url_book, prize, ynom) |>
   # mutate(across(starts_with("topic_"), ~ mean(.x) >= .5)) |>
   mutate(
     across(
@@ -121,7 +147,7 @@ sent_topics <- left_join(shiny_raw, revs_book_url, by = "text") |>
   # mutate(topics_n = select(., starts_with("topic_")) |> rowSums()) |>
   select(
     title, url_book, revs_n_st, revs_n_nomis_st, rater_n_st,
-    senti_mean, starts_with("topic_"), topics_orig
+    senti_mean, starts_with("topic_"), topics_orig, prize, ynom
   )
 
 
