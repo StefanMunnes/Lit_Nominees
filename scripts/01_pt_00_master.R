@@ -24,9 +24,9 @@ try(setwd("scripts/"))
 # create function to clean names
 clean <- function(var) {
   tolower(var) |>
-    str_remove_all("[!\"#$%&'()*+,.:;<=>?@^_\\[\\]{|}~/]") |> # keep -
-    str_replace_all(" ", "-") |>
-    stri_trans_general("de-ASCII")
+    stringr::str_remove_all("[!\"#$%&'()*+,.:;<=>?@^_\\[\\]{|}~/]") |> # keep -
+    stringr::str_replace_all(" ", "-") |>
+    stringi::stri_trans_general("de-ASCII")
 }
 
 cr_match_id <- function(var1, var2, len = 10) {
