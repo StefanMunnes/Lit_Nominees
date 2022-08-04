@@ -2,27 +2,22 @@
 # check for multiple years
 # 1. keep latest, or 2. see if all years in front, or 3. expected value in row
 
-prizes_raw <- readRDS("../data/wiki_prizes_raw.RDS")
+prizes_raw <- readRDS("../data/wp_prizes_raw.RDS")
 
-prizes_raw$year[prizes_raw$url_prize == "/wiki/Walter-Kempowski-Literaturpreis"] <- str_extract(prizes_raw$h3, "[0-9]{4,4}")
 
 prizes_all <- prizes_raw |>
   mutate(
+    year = case_when(
+      title == "Walter-Kempowski-Literaturpreis" ~ str_extract(3, "[0-9]{4,4}"),
+      TRUE ~ year
+    ),
     keep = case_when(
       note == "empty" ~ FALSE,
       str_detect(h2, "Mehrfachgewinner") ~ FALSE,
       str_detect(h2, "Kritikerjury") ~ FALSE,
-      str_detect(h2, "Die Jury") ~ FALSE,
-      str_detect(h2, "Auswahlverfahren und Jury") ~ FALSE,
-      str_detect(h2, "Publikationen") ~ FALSE,
-      str_detect(h2, "Werke") ~ FALSE,
-      str_detect(h2, "Veröffentlichungen") ~ FALSE,
-      str_detect(h2, "Belege") ~ FALSE,
       str_detect(h2, "Schriftenreihe der ILG") ~ FALSE,
       str_detect(h2, "Veranstaltungsreihen") ~ FALSE,
-      str_detect(h2, "Organisation") ~ FALSE,
-      str_detect(h2, "Referenzen") ~ FALSE,
-      str_detect(title, "Ingeborg-Bachmann-Preis") & str_detect(h2, "Preise") ~ FALSE,
+      title == "Ingeborg-Bachmann-Preis" & str_detect(h2, "Preise") ~ FALSE,
       is.na(year) | year == "" ~ FALSE,
       TRUE ~ TRUE
     ),
@@ -33,13 +28,21 @@ prizes_all <- prizes_raw |>
   ungroup()
 
 
+chapters <- data.frame(table(prizes_all$h2[!prizes_all$keep]))
+
+
 test <- filter(prizes_all, !keep)
 # test2 <- filter(prizes_all, multi_year)
 
 
+# ! after split -> remove duplicates over prize and year (still some errors)
+
 prizes_clean <- filter(prizes_all, keep) |>
   separate_rows(name, link, by = " ; ") |>
+  # remove authors without valid wiki pages
   filter(!grepl("edit&redlink=1", link, TRUE))
+
+
 
 
 # check for multiple years
