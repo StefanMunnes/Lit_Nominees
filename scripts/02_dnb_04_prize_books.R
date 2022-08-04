@@ -239,7 +239,7 @@ dnb_books_prize <- dnb_books_all |>
   group_by(author_search) |>
   fill(c(author_id, author_year), .direction = "updown") |>
   ungroup() |>
-  # check for books with multiple titles by same (shortend) match_id
+  # check for books with multiple titles by same (shortened) match_id
   # -> slightly different titles -> clean further and split subtitle from title
   mutate(match_id_short = str_extract(match_id, "^.+?_[^_]{1,5}")) |>
   group_by(match_id_short) |>
