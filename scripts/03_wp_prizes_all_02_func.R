@@ -93,7 +93,8 @@ wiki_prizes <- function(htmls) {
 
       # check if chapter title is valid (no standard) -> proceed; otherwise NULL
       # if redirected -> just check chapter with same title as link
-      if (df_struc$chapter %in% chapters_ignore) {
+      if (grepl(regex_skp_chpt, df_struc$chapter, perl = TRUE) &
+        !grepl("preis", df_struc$chapter, ignore.case = TRUE, perl = TRUE)) {
         return(NULL)
       } else if (!is.na(redirect_title) & df_struc$chapter != redirect_title) {
         return(NULL)

@@ -21,13 +21,15 @@
 htmls_ls <- readRDS("../data/wp_prizes_htmls.RDS")
 
 # prepare vectors and regular expressions for extraction function
-chapters_ignore <- c(
-  "Einzelnachweise", "Zitatnachweis", "Siehe auch", "Fußnoten",
-  "Jury", "Die Jury", "Quellen", "Geschichte", "Literatur",
-  "Weiterführende Literatur", "Organisation",
-  "Notizen", "Anmerkungen", "Weblinks", "Weblink",
-  "Mitglieder", "Mitglieder (Auswahl)"
-)
+regex_skp_chpt <- c(
+  "Name", "Geschichte", "Hintergrund", "Mitglieder", "Organisation", "Ziel",
+  "Struktur", "Unterstützer", "Jury", "Stiftungsrat", "Stiftungsdaten",
+  "Kuratorium", "Freundeskreis", "Publikationen", "Veröffentlichungen",
+  "Literatur", "Werke", "Anmerkungen", "Trivia", "Rezeption", "Notizen",
+  "Fußnoten", "Quellen", "Belege", "Referenzen", "nachweis", "Siehe auch",
+  "Weblink"
+) |>
+  paste(collapse = "|")
 
 # set names of table columns to be extracted in loop function
 table_winner <- c("Preisträger", "Autor")
