@@ -1,12 +1,9 @@
 
-path_shiny <- "../data/shiny_handcoding/data/"
-
-
 # ---- 1. load and merge shiny raw data ----
 
 shiny_raw <- lapply(c("01", "02", "03"), function(dir) {
   files <- list.files(
-    path = paste0(path_shiny, dir),
+    path = paste0("../data/shiny_handcoding/data/", dir),
     pattern = ".csv", full.names = TRUE
   )
 
@@ -41,12 +38,9 @@ revs_book_url <- readRDS("../data/pt_reviews.RDS") |>
 
 
 # dictionary for reduction of open codes to more generalized
-codes <- read_excel(path = "../data/themen_all.xlsx", sheet = 1) |>
+codes <- read.csv("../data/topics_hc.csv") |> 
   select(original, final) |>
-  na.omit() |>
-  filter(final != "E") |>
   mutate(original = str_remove_all(original, "[ ()-]"))
-
 
 
 # ---- 2. clean raw shiny data ----
@@ -96,7 +90,7 @@ sent_topics <- inner_join(shiny_raw, revs_book_url, by = "text") |>
   ) |>
   # calculate mean sentiment: group also by prize & year
   group_by(url_book, prize, ynom) |>
-  mutate(senti_mean = round(mean(Sentiment, na.rm = T), 2)) |>
+  mutate(senti_mean = round(mean(Sentiment, na.rm = TRUE), 2)) |>
   # keep just the one observation per rater with topic included
   # can't just filter over NA; sometimes topics missing, keep at least one row
   group_by(url_book, rater, prize, ynom) |>
@@ -122,16 +116,15 @@ sent_topics <- inner_join(shiny_raw, revs_book_url, by = "text") |>
     topic_politics = str_detect(topics_tmp, "\\bB\\b"),
     topic_relations = str_detect(topics_tmp, "\\bC\\b"),
     topic_identity = str_detect(topics_tmp, "\\bD\\b"),
-    topic_culture = str_detect(topics_tmp, "\\bF\\b")
+    topic_culture = str_detect(topics_tmp, "\\bE\\b")
   ) |>
   # if multiple raters, keep three topics with highest agreement *larger zero*
   # JV: 4 books lose topics
   #     Apostoloff                      C;A;D     2
   #     Annette, ein Heldinnenepos      Epos;A;B  1
   #     Ambra                           C;A;A     1
-  #     Am Ende schmeißen wir mit Gold  D;F       0
+  #     Am Ende schmeißen wir mit Gold  D;E       0
   group_by(url_book, prize, ynom) |>
-  # mutate(across(starts_with("topic_"), ~ mean(.x) >= .5)) |>
   mutate(
     across(
       starts_with("topic_"),
@@ -144,7 +137,6 @@ sent_topics <- inner_join(shiny_raw, revs_book_url, by = "text") |>
   mutate(topics_orig = paste(topics_orig, collapse = "|")) |>
   filter(row_number() == 1) |>
   ungroup() |>
-  # mutate(topics_n = select(., starts_with("topic_")) |> rowSums()) |>
   select(
     title, url_book, revs_n_st, revs_n_nomis_st, rater_n_st,
     senti_mean, starts_with("topic_"), topics_orig, prize, ynom
@@ -152,23 +144,3 @@ sent_topics <- inner_join(shiny_raw, revs_book_url, by = "text") |>
 
 
 saveRDS(sent_topics, "../data/sentiment_topics.RDS")
-
-
-
-# test data.frame to see co-occurrence from uncategorized topics
-#
-# test <- sent_topics |>
-#   select(title, senti_mean, rater_n, starts_with("Thema"), starts_with("topic")) |>
-#   distinct() |>
-#   mutate(thema = paste(Thema1, Thema2, Thema3, sep = ";")) |>
-#   separate_rows(thema, sep = ";") |>
-#   filter(str_length(thema) > 2) |>
-#   select(thema, starts_with("topic")) |>
-#   group_by_all() |>
-#   summarize(n = n()) |>
-#   arrange(thema, desc(n))
-
-# # delete in final code
-# sent_topics |>
-#   filter(topics_n < 3, topics_tmp |> str_detect("[A:F]")) |>
-#   View()
