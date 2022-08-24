@@ -50,9 +50,6 @@ dnb_authors_df <- bind_rows(dnb_authors_ls, .id = "author_id") |>
 
 # ---- 1.2  get missing wikipedia links from wikidata ----
 wiki_miss <- filter(dnb_authors_df, is.na(wikipedia) & !is.na(wikidata))
-#|> mutate(wikidata = ifelse())
-
-# https://www.wikidata.org/wiki/Q112533155
 
 wiki_miss_new <- lapply(wiki_miss$wikidata, function(url) {
   message(url)
@@ -74,7 +71,21 @@ wiki_miss_new <- lapply(wiki_miss$wikidata, function(url) {
 
 # ---- 1.3 add missing wikipedia links to first data.frame -----
 dnb_authors_df <- full_join(dnb_authors_df, wiki_miss_new, by = "wikidata") |>
-  mutate(wikipedia = ifelse(is.na(wikipedia), wikipedia_new, wikipedia)) |>
+  mutate(
+    # add missing wikipedia links from wikimedia
+    wikipedia = ifelse(is.na(wikipedia), wikipedia_new, wikipedia),
+
+    # shorten link url
+    wikipedia = str_remove(wikipedia, "https://de.wikipedia.org"),
+
+    # add some missing links manually
+    wikipedia = case_when(
+      author_name == "Juliana Kálnay" ~ "/wiki/Juliana_Kálnay",
+      author_name == "Anja Jardine" ~ "/wiki/Anja_Jardine",
+      author_name == "Necati Öziri" ~ "/wiki/Necati_Öziri",
+      TRUE ~ wikipedia
+    )
+  ) |>
   select(!wikipedia_new)
 
 
