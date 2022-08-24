@@ -14,7 +14,7 @@ get_name_link <- function(iterator, attr) {
   href <- href[grepl("title=", href, perl = TRUE)] # withtitle -> no footnotes
 
   text <- rvest::html_attr(href, attr) |>
-    paste(collapse = " ; ")
+    paste(collapse = ";")
 
   text[text == ""] <- NA
 
@@ -22,10 +22,10 @@ get_name_link <- function(iterator, attr) {
 }
 
 get_years <- function(txt) {
-  str_extract_all(txt, regex_year) |>
+  stringr::str_extract_all(txt, regex_year) |>
     sapply(paste, collapse = ";") |>
-    str_replace_all("^NA$", "") |>
-    na_if("")
+    stringr::str_replace_all("^NA$", "") |>
+    dplyr::na_if("")
 }
 
 
@@ -194,7 +194,7 @@ wiki_prizes <- function(htmls) {
             # loop over table if year included -> get columns
             year_cols <- which(grepl("Jahr|Preisjahr", cells[[1]], perl = TRUE))
             winner_cols <- which(
-              grepl("[Pp]reis(?!jahr)|Autor|Finale", cells[[1]], perl = TRUE)
+              grepl(regex_winner_cols, cells[[1]], perl = TRUE)
             )
 
             # if no year column but valid year in subheading -> add column

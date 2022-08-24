@@ -32,7 +32,7 @@ regex_skp_chpt <- c(
   paste(collapse = "|")
 
 # set names of table columns to be extracted in loop function
-table_winner <- c("Preisträger", "Autor")
+regex_winner_cols <- "[Pp]reis(?!jahr)|Autor|Finale|Stadtschreiber"
 
 # set regular expression of year to extract (some are still different in funct)
 regex_year <- "\\b(19[1-9]|20[0-2])[0-9]\\b"
