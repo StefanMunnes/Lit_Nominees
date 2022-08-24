@@ -30,7 +30,11 @@ clean <- function(var) {
 }
 
 cr_match_id <- function(var1, var2, len = 10) {
-  paste(var1, substr(clean(var2), 1, len), str_length(clean(var2)), sep = "_")
+  paste(var1,
+    substr(clean(var2), 1, len),
+    stringr::str_length(clean(var2)),
+    sep = "_"
+  )
 }
 
 
