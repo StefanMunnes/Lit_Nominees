@@ -1,6 +1,48 @@
-### prepare helper functions to extract infos from html
-html_clean_text <- function(x) {
-  text <- rvest::html_text(x) |>
+### prepare helper functions to extract infos from htmls
+
+`%notin%` <- Negate(`%in%`)
+
+# get prize urls from main urls with containing lists, with special nodes
+scrp_urls <- function(urls, node, main_url = url_wiki) {
+  sapply(urls, function(url) {
+    if (node == "auto") {
+      if (grepl("^Kategorie:", url)) node <- "#mw-pages li a:nth-child(1)"
+      if (grepl("^Liste_", url)) node <- "#h2+ ul a:nth-child(1)"
+      if (grepl("Literaturpreisen#Schweiz", url)) node <- "ul:nth-child(56) a"
+      if (grepl("Literaturpreisen$", url)) node <- "h2+ ul li > a:nth-child(1)"
+    }
+
+    message(url, "\n    ", node)
+
+    Sys.sleep(1)
+
+    rvest::read_html(paste0(main_url, "/wiki/", url)) |>
+      rvest::html_nodes(node) |>
+      rvest::html_attr("href")
+  }) |>
+    unlist()
+}
+
+
+# scrape list of raw html in text format to store
+scrp_htmls <- function(urls, main_url = url_wiki) {
+  htmls_ls <- lapply(urls, function(url) {
+    message(url)
+
+    Sys.sleep(1)
+
+    httr::GET(paste0(main_url, url)) |> httr::content(as = "text")
+  })
+
+  names(htmls_ls) <- urls
+
+  return(htmls_ls)
+}
+
+
+# get clean text from html
+html_clean_text <- function(html) {
+  text <- rvest::html_text(html) |>
     stringr::str_remove_all("(\\[.+\\]|\\n)$") |>
     stringr::str_squish()
 
@@ -9,6 +51,8 @@ html_clean_text <- function(x) {
   return(text)
 }
 
+
+# get all urls and titles from urls
 get_name_link <- function(iterator, attr) {
   href <- rvest::html_elements(iterator, "a")
   href <- href[grepl("title=", href, perl = TRUE)] # withtitle -> no footnotes
@@ -20,6 +64,7 @@ get_name_link <- function(iterator, attr) {
 
   return(text)
 }
+
 
 get_years <- function(txt) {
   stringr::str_extract_all(txt, regex_year) |>
@@ -185,7 +230,12 @@ wiki_prizes <- function(htmls) {
           ns <- xml_ns(table)
 
           # loop over all tables (try to add year subheadings if missing column)
-          ls_table <- lapply(seq_len(length(table)), function(tab) {
+          ls_table <- lapply(seq_along(table), function(tab) {
+
+            # skip (irst) if main table contains sub-tables -> they follow
+            if (str_count(as.character(table[[tab]]), "<table") > 1) {
+              return(NULL)
+            }
 
             # prepare rows and cells for extraction of infos
             rows <- xml_find_all(table[tab], ".//tr", ns = ns)
