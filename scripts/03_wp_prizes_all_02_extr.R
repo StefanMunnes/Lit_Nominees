@@ -23,8 +23,9 @@ htmls_ls <- readRDS("../data/wp_prizes_htmls.RDS")
 # prepare vectors and regular expressions for extraction function
 regex_skp_chpt <- c(
   "Name", "Geschichte", "Hintergrund", "Mitglieder", "Organisation", "Ziel",
-  "Struktur", "Unterstützer", "Jury", "Stiftungsrat", "Stiftungsdaten",
-  "Kuratorium", "Freundeskreis", "Publikationen", "Veröffentlichungen",
+  "Struktur", "Unterstützer", "Jury", "Juroren", "Jurorinnen und Juroren",
+  "Stiftungsrat", "Stiftungsdaten", "Kuratorium", "Freundeskreis",
+  "Publikationen", "Veröffentlichungen",
   "Literatur", "Werke", "Anmerkungen", "Trivia", "Rezeption", "Notizen",
   "Fußnoten", "Quellen", "Belege", "Referenzen", "nachweis", "Siehe auch",
   "Weblink"
@@ -32,7 +33,7 @@ regex_skp_chpt <- c(
   paste(collapse = "|")
 
 # set names of table columns to be extracted in loop function
-regex_winner_cols <- "[Pp]reis(?!jahr)|Autor|Finale|Stadtschreiber"
+regex_winner_cols <- "[Pp]reis(?!jahr)|Autor|Gewinner|Finale|Stadtschreiber"
 
 # set regular expression of year to extract (some are still different in funct)
 regex_year <- "\\b(19[1-9]|20[0-2])[0-9]\\b"
@@ -51,4 +52,4 @@ prizes_raw <- bind_rows(prizes_ls)
 
 saveRDS(prizes_raw, file = "../data/wp_prizes_raw.RDS")
 
-# [names(htmls_ls) == "/wiki/Die_Kogge"]
+# [names(htmls_ls) == "/wiki/Hansjörg-Martin-Preis"]
