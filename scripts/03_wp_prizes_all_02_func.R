@@ -2,6 +2,14 @@
 
 `%notin%` <- Negate(`%in%`)
 
+
+url_decode_utf <- function(x) {
+  y <- URLdecode(x)
+  Encoding(y) <- "UTF-8"
+  y
+}
+
+
 # get prize urls from main urls with containing lists, with special nodes
 scrp_urls <- function(urls, node, main_url = url_wiki) {
   sapply(urls, function(url) {
@@ -380,4 +388,26 @@ wiki_prizes <- function(htmls) {
 
     return(df_page)
   })
+}
+
+
+multi_years <- function(var = year) {
+  year_list <- stringr::str_split(var, pattern = ";") |>
+    unlist() |>
+    as.numeric()
+
+  if (length(year_list) < 2) {
+    return(var)
+  }
+  if (length(year_list) > 2) {
+    return(var) # return("multi year")
+  }
+
+  # if year_list == 2
+  if (abs(diff(year_list, 1)) >= 2) {
+    return(var) # return("big diff")
+  }
+
+  # if diff(year_list) == 2
+  return(max(year_list))
 }

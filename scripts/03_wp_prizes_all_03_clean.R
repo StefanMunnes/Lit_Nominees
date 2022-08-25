@@ -2,34 +2,10 @@
 # check for multiple years
 # 1. keep latest, or 2. see if all years in front, or 3. expected value in row
 
-multi_years <- function(var = year) {
-  year_list <- stringr::str_split(var, pattern = ";") |>
-    unlist() |>
-    as.numeric()
 
-  if (length(year_list) < 2) {
-    return(var)
-  }
-  if (length(year_list) > 2) {
-    return(var) # return("multi year")
-  }
-
-  # if year_list == 2
-  if (abs(diff(year_list, 1)) >= 2) {
-    return(var) # return("big diff")
-  }
-
-  # if diff(year_list) == 2
-  return(max(year_list))
-}
-
-
-url_decode_utf <- function(x) {
-  y <- URLdecode(x)
-  Encoding(y) <- "UTF-8"
-  y
-}
-
+# check: https://de.wikipedia.org/wiki/Bulletin_Jugend_%26_Literatur
+# add years for ingeborg bachman preis from url title
+# check chapter with many months and years and tables
 
 prizes_raw <- readRDS("../data/wp_prizes_raw.RDS")
 
@@ -101,7 +77,7 @@ authors_wiki <- readRDS("../data/dnb_books_prize.RDS") |>
   transmute(link = wikipedia |>
     str_remove("https://de.wikipedia.org") |>
     url_decode_utf()) |>
-  filter(link != "NA") 
+  filter(link != "NA")
 
 
 authors_prizes_wiki <- left_join(authors_wiki, prizes_all, by = "link")
