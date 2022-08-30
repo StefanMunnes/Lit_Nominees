@@ -39,10 +39,6 @@ regex_winner_cols <- "[Pp]reis(?!jahr)|Autor|Gewinner|Finale|Stadtschreiber"
 regex_year <- "\\b(19[1-9]|20[0-2])[0-9]\\b"
 
 
-# source function to extract informations from raw html
-source("../scripts/03_wp_prizes_all_02_func.R")
-
-
 # run function over all raw htmls -> get list of data.frames for each prize
 prizes_ls <- wiki_prizes(htmls_ls)
 
@@ -52,4 +48,4 @@ prizes_raw <- bind_rows(prizes_ls)
 
 saveRDS(prizes_raw, file = "../data/wp_prizes_raw.RDS")
 
-# [names(htmls_ls) == "/wiki/Hansjörg-Martin-Preis"]
+# [names(htmls_ls) == "/wiki/Großer_Österreichischer_Staatspreis"]
