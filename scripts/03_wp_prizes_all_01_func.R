@@ -74,8 +74,8 @@ get_name_link <- function(iterator, attr) {
 }
 
 
-get_years <- function(txt) {
-  stringr::str_extract_all(txt, regex_year) |>
+get_years <- function(txt, regex = regex_year) {
+  stringr::str_extract_all(txt, regex) |>
     sapply(paste, collapse = ";") |>
     stringr::str_replace_all("^NA$", "") |>
     dplyr::na_if("")
@@ -133,9 +133,7 @@ wiki_prizes <- function(htmls) {
         as.list() |>
         data.frame() |>
         # if first chapter is empty -> add manually
-        mutate(h2 = ifelse(sum(is.na(c_across(h2:h4))) == 3,
-          "first chapter", h2
-        )) |>
+        mutate(h2 = ifelse(all(is.na(c_across(h2:h4))), "first chapter", h2)) |>
         # create chapter column for check in loop to skip
         unite(chapter, remove = FALSE, na.rm = TRUE) |>
         # create indicator for level of chapter (later fill higher levels)
@@ -186,6 +184,7 @@ wiki_prizes <- function(htmls) {
             html_clean_text() |>
             get_years() |>
             na.omit()
+
           # length of sublists (see different tags for different styls)
           subl_nds <- html_elements(html, "ul, ol, dd, dl+ p")
           subl_n <- sapply(subl_nds, function(x) length(html_elements(x, "li")))
@@ -230,17 +229,23 @@ wiki_prizes <- function(htmls) {
 
         if (length(table) > 0) {
 
+          # get name space from table for cells (see html_table from rvest)
+          ns <- xml_ns(table)
+
           # get years from subheadings if multiple tables per chapter
           subhead <- html_elements(html, "dt, b") |> html_clean_text()
           subh_years <- get_years(subhead)
 
-          # get name space from table for cells (see html_table from rvest)
-          ns <- xml_ns(table)
+          # if still missing in year -> try to get year from chapter title
+          if (all(is.na(subh_years))) {
+            subh_years <- get_years(df_struc$chapter)
+            subh_years <- rep(subh_years, length(table))
+          }
 
           # loop over all tables (try to add year subheadings if missing column)
           ls_table <- lapply(seq_along(table), function(tab) {
 
-            # skip (irst) if main table contains sub-tables -> they follow
+            # skip (first) if main table contains sub-tables -> they follow
             if (str_count(as.character(table[[tab]]), "<table") > 1) {
               return(NULL)
             }
@@ -248,6 +253,25 @@ wiki_prizes <- function(htmls) {
             # prepare rows and cells for extraction of infos
             rows <- xml_find_all(table[tab], ".//tr", ns = ns)
             cells <- lapply(rows, xml_find_all, ".//td|.//th", ns = ns)
+
+            # check if table contains list -> extract and filter list
+            if (grepl("<li>", as.character(table[[tab]], perl = TRUE))) {
+              df_tablist <- lapply(cells[[1]], function(cell) {
+                # check if column (as sub-cell) contains Literature
+                if (grepl("Literatur", as.character(cell))) {
+                  data.frame(text = html_elements(cell, "li, dd") |>
+                    html_clean_text())
+                }
+              }) |>
+                bind_rows()
+
+              # if valid data.frame -> filter just valid cases & add note
+              if (nrow(df_tablist > 0)) {
+                df_list <<- left_join(df_tablist, df_list, by = "text") |>
+                  mutate(note = paste(note, "as table"))
+              }
+              return(NULL)
+            }
 
             # loop over table if year included -> get columns
             year_cols <- which(grepl("Jahr|Preisjahr", cells[[1]], perl = TRUE))
