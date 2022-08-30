@@ -109,6 +109,8 @@ urls_prizes_all <- c(
   # remove more prizes manually
   subset(. %notin% c(
     "/wiki/Theaterpreis", # list of theater prizes
+    "/wiki/Brücke_Berlin_Theaterpreis", # theater prize
+    "/wiki/St%C3%BCckemarkt_des_Berliner_Theatertreffens", # theater prize
     "/wiki/Kurt_Wolff_Stiftung", # Verlagspreis
     "/wiki/Dulzinea_(Zeitschrift)",
     "/wiki/Diagram-Preis", # english book title
