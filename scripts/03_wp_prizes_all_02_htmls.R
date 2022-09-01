@@ -125,7 +125,38 @@ urls_prizes_all <- c(
     "/wiki/Prémio_Camões", # portuges
     "/wiki/Premio_Internazionale_di_Poesia_Nosside", # no german authors
     "/wiki/Internationale_Bodenseekonferenz", # no prize
-    "http://www.literaturport.de/index.php?id=33" # wrong url
+    "/wiki/Melusine-Huss-Preis", # sub-prize; redirect to other prize
+    "/wiki/Der_erste_Roman", # old name, now Mara-Cassens-Preis
+    "http://www.literaturport.de/index.php?id=33", # wrong url
+    "/wiki/Josef_Guggenmos#Josef-Guggenmos-Preis", # duplicate
+    "/wiki/Anke_Bennholdt-Thomsen-Lyrikpreis", # duplicate of Deutsche Schillerstiftung
+    "/wiki/Adolf-Mejstrik-Ehrengabe_für_Lyrik", # duplicate of Deutsche Schillerstiftung
+    "/wiki/SchnippZ-Preis", # part of a Hörspielpreis
+    "/wiki/Zonser_Darstellerpreis", # part of a Hörspielpreis
+    "/wiki/Anna-Seghers-Preis", # duplicate
+    "/wiki/Lyrikpreis_der_Lyriktage_Freudenstadt", # old name, now Inge-Czernik-Förderpreis
+    "/wiki/Westfälischer_Förderpreis", # duplicate of Ernst-Meister-Preis für Lyrik
+    "/wiki/Floriana_(Literatur)", # duplicate of Floriana (Literaturpreis)
+    "/wiki/Preis_der_Frankfurter_Anthologie", # duplicate
+    "/wiki/Georg-Trakl-Förderungspreis_für_Lyrik", # duplciate of
+    "/wiki/Goethepreis_der_Stadt_Frankfurt", # duplicate
+    "/wiki/Grosser_Literaturpreis_des_Kantons_Bern",
+    "/wiki/Großer_Österreichischer_Staatspreis_für_Literatur", # duplicate
+    "/wiki/Ehrengabe_der_Heinrich-Heine-Gesellschaft", # duplicate
+    "/wiki/Poesiepreis_der_Stadt_Amsterdam", # duplicate of Herman-Gorter-Preis
+    "/wiki/Hubert-Burda-Preis_für_junge_Lyrik", # duplicate
+    "/wiki/Junges_Literaturforum_Hessen", # duplicate
+    "/wiki/Kranichsteiner_Literaturförderpreis", # duplicate
+    "/wiki/Literaturpreis_des_Kulturkreises_der_deutschen_Wirtschaft", # duplicate Text & Sprache
+    "/wiki/Luchs_des_Jahres", # duplicate
+    "/wiki/Alfred-Gruber-Preis", # duplicate of Literaturpreis Meran
+    "/wiki/Preis_der_Jungen_Literaturhäuser", # duplicate
+    "/wiki/Preis_der_Stadt_Münster_für_Europäische_Poesie", # duplicate
+    "/wiki/Österreichischer_Staatspreis_für_Kinderlyrik", # duplicate
+    "/wiki/Österreichischer_Staatspreis_für_Kulturpublizistik", # duplicate
+    "/wiki/Ver.di_Literatur-Ehrenpreis", # duplicate
+    "/wiki/Hans-Huckebein-Preis", # duplciate of Wilhelm-Busch-Preis
+    "/wiki/Postpoetry" # duplicate
   )) |>
   # remove unvalid links (page not available, just create from edit)
   str_subset("action=edit", TRUE)
