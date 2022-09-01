@@ -4,8 +4,9 @@
 # prepared nominee data from perlentaucher (prizes + books + reviews)
 nominees_pt <- readRDS("../data/nominees_pt.RDS")
 
-# lod sentiment and topics
-sent_topics <- readRDS("../data/sentiment_topics.RDS")
+# sentiment and topics
+sent_topics <- readRDS("../data/sentiment_topics.RDS") |>
+  distinct(across(url_book:topics_orig))
 
 # Publisher Information
 publisher <- read.csv("../data/publisherstatus/publisherstatus_new.csv",
@@ -27,6 +28,16 @@ dnb_books <- readRDS("../data/dnb_books_prize.RDS") |>
 # wikipedia data
 wikiviews_pre <- readRDS("../data/wikiviews_pre.RDS")
 
+# all prizes/nominations from wikipedia (before nomination)
+wikiprizes_authors <- readRDS("../data/wp_prizes_authors.RDS") |>
+  select(wiki_url, year) |>
+  # prepare missings in url with url_name
+  mutate(
+    wiki_url =
+      str_remove_all(wiki_url, "/w/index.php\\?title=|&action=edit&redlink=1")
+  ) |>
+  rename(wikiprizes_year = year)
+# wiki_url = ifelse(str_detect(wiki_url, "/wiki/"), wiki_url, clean(wiki_url))
 
 
 nominees <- nominees_pt |>
@@ -73,16 +84,34 @@ nominees <- nominees_pt |>
   ) |>
   ungroup() |>
   # 6. Add Wikipedia Views
-  left_join(wiki_data_pre) |>
+  full_join(wikiviews_pre, by = c("url_name", "prize", "ynom")) |>
+  # 7. number of awards (on wikipedia) before nomination
+  # prepare wiki_url to match with missing urls -> just name with _
+  mutate(
+    wiki_url = na_if(wiki_url, "NA"),
+    wiki_url =
+      ifelse(
+        is.na(wiki_url),
+        str_replace_all(authors, " ", "_"),
+        wiki_url
+      )
+  ) |>
+  full_join(wikiprizes_authors, by = "wiki_url") |>
+  group_by(url_name, prize, ynom) |>
+  arrange(wikiprizes_year) |>
+  mutate(wikiprizes_pre = sum(wikiprizes_year < ynom)) |>
+  filter(row_number() == 1) |>
+  ungroup() |>
+  # keep just necessary variales
   select(
     authors, title_pt, subti, prize, ynom, shortlist, winner, debut,
     jury_fem, nom_prize_n, nom_prize_prev,
     ybirth, ydeath, age_nom, female, language, academic, institute,
     revs_n, revs_fem, revs_n_nomis_st, senti_mean,
-    books_dnb_n, books_dnb_prev, books_pt_n,
+    books_dnb_n, books_dnb_prev, books_pt_n, wikiviews_pre, wikiprizes_pre,
     ypub, publisher, pub_place, starts_with("pub_rep"), # pages, price, type, isbn,
     tags, tpcs, keyword_dnb, starts_with("topic_"), topics_orig,
-    views_pre, shortlist_date, longlist_date, interval,
+    shortlist_date, longlist_date, interval,
     url_name, url_book, match_id, no_pt, no_senttop
   )
 
