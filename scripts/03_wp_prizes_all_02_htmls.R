@@ -92,7 +92,13 @@ urls_prizes_all <- c(
     "/wiki/Kitzbüheler_Stadtschreiber",
 
     # add mising price manually
-    "/wiki/Friedrich-Glauser-Preis"
+    "/wiki/Friedrich-Glauser-Preis",
+
+    # add certain theater prizes manually; source: /wiki/Theaterpreis
+    "/wiki/Welti-Preis",
+    "/wiki/Nestroy-Theaterpreis/Bestes_Stück_–_Autorenpreis",
+    "/wiki/Johann-Nestroy-Ring",
+    "/wiki/Else-Lasker-Sch%C3%BCler-Dramatikerpreis"
   ) |>
   # remove dubplicates
   unique() |>
@@ -102,7 +108,7 @@ urls_prizes_all <- c(
   str_subset("[pP]ri(x|ze)|Award|Medal|Child|Dagg|Adult|Poet_|_Griff", TRUE) |>
   str_subset("Thijssenprijs|Schwed|Tomas|Tchicaya|_de_|Szymborska", TRUE) |>
   str_subset("japanisch|Tsukahara|Saisei|Kiriyama|Takami|Ogawa", TRUE) |>
-  str_subset("((Foto|[hH]ör|Bilder)(spiel|buch))|Cartoon|Illustra", TRUE) |>
+  str_subset("((Foto|[hH]ör|Bilder)(spiel|buch))|Cartoon|Illustra|Comic", TRUE) |>
   str_subset("Verl[ae]g[es]", TRUE) |> # publisher prizes
   str_subset("Übersetz|FIT", TRUE) %>% # translations
 
