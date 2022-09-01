@@ -80,8 +80,8 @@ dnb_books_prize <- dnb_books_all |>
 
       # keep just german publications
       !str_detect(language, "ger|gsw") ~ FALSE,
-      str_detect(publisher, "(Germanic Studies)|(Peters Group)") ~ TRUE,
-      str_detect(publisher, "(Mouton)|(Helsingfors)|(Göteborg)|(Athena$)|(Athi̲na)|(Saint-Nazaire)|(Ōsaka)|(Wrocław)|(México)|(Chur)|(Athi̲na)|(Tel Aviv)|(London)|(New York)|(Manchester)|(San Diego)|(Paris)|(Todmorden)|(Maastricht)|(Eumo Editorial,)|(Argentinien)|(Austin)|(Shoshihanjitsukan)|(Todmorden)|(Montmorency)|(Devesset)|(Cairo)|(Černivci)|(Athēna)|(Pantin)|(São Paulo)|(Porto)|(Ourense)|(San Antonio)|(İstanbul)|(Vianen)|(Washington)|(Malmö)|(Zagreb)|(Bratislava)|(Antwerpen)|(Hanoi)|(Međunarodni)|(Taipei)|(København)|(Amsterdam)|(Stockholm)|(Kyôto)|(Oslo)|(RedFish)|(Warszawa)|(Poznań)|(Kraków)|(Madrid)|(Barcelona)|(Beograd)|(Viby)|(Milano)|(Roma$)|(Utrecht)|(Brussum)|(Baarn)|(Helsingissä)|(Espoo)|(Ljubljana)|(Budapest)|(Lisboa)|(Istanbul)|(Minnesota)|(Lausanne)|(Alidades)|(Holderbank SO)|(Helsingissä)|(Tallinn)|(Praha)|(Westbroek)|(Torino)|(Zaprešić)|(Alinea)|(Ronsosha)|(Bei jing)|(Zlín)|(Shang hai)") ~ FALSE,
+      str_detect(publisher, "Germanic Studies|Peters Group") ~ TRUE,
+      str_detect(publisher, "Mouton|Helsingfors|Göteborg|Athena$|Athi̲na|Saint-Nazaire|Ōsaka|Wrocław|México|Chur|Athi̲na|Tel Aviv|London|New York|Manchester|San Diego|Paris|Todmorden|Maastricht|Eumo Editorial,|Argentinien|Austin|Shoshihanjitsukan|Todmorden|Montmorency|Devesset|Cairo|Černivci|Athēna|Pantin|São Paulo|Porto|Ourense|San Antonio|İstanbul|Vianen|Washington|Malmö|Zagreb|Bratislava|Antwerpen|Hanoi|Međunarodni|Taipei|København|Amsterdam|Stockholm|Kyôto|Oslo|RedFish|Warszawa|Poznań|Kraków|Madrid|Barcelona|Beograd|Viby|Milano|Roma$|Utrecht|Brussum|Baarn|Helsingissä|Espoo|Ljubljana|Budapest|Lisboa|Istanbul|Minnesota|Lausanne|Alidades|Holderbank SO|Helsingissä|Tallinn|Praha|Westbroek|Torino|Zaprešić|Alinea|Ronsosha|Bei jing|Zlín|Shang hai") ~ FALSE,
 
       # remove same name and title - title wrong for one author
       id == "1021842842" ~ FALSE, # uwe-timm_gegen-das-_39
