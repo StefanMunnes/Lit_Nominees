@@ -175,7 +175,7 @@ wiki_prizes <- function(htmls) {
 
           # fill year if (sub)-chapter is year
           if (grepl("^[0-9]{4,4}$", df_struc$chapter)) {
-            df_list$year <- get_years(df_struc$chapter)
+            df_list$year[is.na(df_list$year)] <- get_years(df_struc$chapter)
             df_list$note <- paste(df_list$note, "& chapter year")
           }
 
