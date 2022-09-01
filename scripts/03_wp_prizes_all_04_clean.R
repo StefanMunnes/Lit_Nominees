@@ -47,12 +47,12 @@ prizes_all <- prizes_raw |>
       is.na(year) | year == "" ~ FALSE, # no year
       TRUE ~ TRUE
     ),
-    link = url_decode_utf(link)
+    wiki_url = url_decode_utf(link) # new name for decoded url to match
   ) |>
   # remove unvalid observations
   filter(keep) |>
   # split if multiple authors per row (= year)
-  separate_rows(name, link, sep = ";") |>
+  separate_rows(name, wiki_url, sep = ";") |>
   # get year from long list of names with years in parantheses
   mutate(
     text = ifelse(
@@ -72,22 +72,22 @@ prizes_all <- prizes_raw |>
   separate_rows(year, sep = ";") |>
   # manually correct wiki urls
   mutate(
-    link = case_when(
-      link == "/wiki/Volker_H._Altwasser" ~ "/wiki/Volker_Altwasser",
-      TRUE ~ link
+    wiki_url = case_when(
+      wiki_url == "/wiki/Volker_H._Altwasser" ~ "/wiki/Volker_Altwasser",
+      TRUE ~ wiki_url
     ) |> str_squish()
   ) |>
   # filter duplicates per price, chapter, name & year (no Sub-Chapters h3, h4)
-  distinct(url_prize, year, name, link, .keep_all = TRUE)
+  distinct(url_prize, year, name, wiki_url, .keep_all = TRUE)
 
 
 # load list of authors wiki urls to match with long list of all prizes
 authors_wiki_url <- readRDS("../data/dnb_books_prize.RDS") |>
   distinct(name, wikipedia) |>
-  transmute(link = wikipedia |>
+  transmute(wiki_url = wikipedia |>
     str_remove("https://de.wikipedia.org") |>
     url_decode_utf()) |>
-  filter(link != "NA")
+  filter(wiki_url != "NA")
 
 # additionaly, get all prizes from authors without valid wiki url
 prizes_no_wiki <- prizes_all |>
@@ -96,15 +96,28 @@ prizes_no_wiki <- prizes_all |>
     "Ramona Raabe ", "Dimitrij Wall", "Martin Kordic"
   ))
 
-# filter lsit of all prizes by authors wiki url & add prizes authors w/out link
-prizes_authors <- left_join(authors_wiki_url, prizes_all, by = "link") |>
-  rbind(prizes_no_wiki)
+# filter list of all prizes by authors wiki url & add prizes authors w/out wiki_url
+prizes_authors <- left_join(authors_wiki_url, prizes_all, by = "wiki_url") |>
+  rbind(prizes_no_wiki) |>
+  mutate(keep = case_when(
+    # exclude some translations
+    str_detect(text, "Übersetzung") & title == "Hamburger Literaturpreise" ~ FALSE,
+    str_detect(text, "Übersetzung") & name == "Olaf Kühl" ~ FALSE,
+    str_detect(text, "Übersetzung") & name == "Karl Rühmann" ~ FALSE,
 
+    # exclude win as publisher
+    str_detect(text, "Herausgeber") & name == "Susan Kreller" ~ FALSE,
+
+    # exclude non-win
+    title == "Heidelberger Stückemarkt" & name == "Verena Güntner" ~ FALSE,
+    TRUE ~ TRUE
+  )) |>
+  filter(keep)
 
 prizes_authors_miss <- filter(prizes_authors, is.na(title))
 
 
-saveRDS(prizes_authors, file = "../data/wp_prizes_authos.RDS")
+saveRDS(prizes_authors, file = "../data/wp_prizes_authors.RDS")
 
 
 # ! Jury in Sublist
