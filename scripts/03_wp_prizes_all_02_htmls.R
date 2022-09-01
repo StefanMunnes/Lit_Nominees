@@ -117,6 +117,8 @@ urls_prizes_all <- c(
     "/wiki/Theaterpreis", # list of theater prizes
     "/wiki/Brücke_Berlin_Theaterpreis", # theater prize
     "/wiki/St%C3%BCckemarkt_des_Berliner_Theatertreffens", # theater prize
+    "/wiki/Stückemarkt_des_Berliner_Theatertreffens", # theater prize
+    "/wiki/Deutscher_Buchpreis", # winner part of other url with nominees list
     "/wiki/Kurt_Wolff_Stiftung", # Verlagspreis
     "/wiki/Dulzinea_(Zeitschrift)",
     "/wiki/Diagram-Preis", # english book title
