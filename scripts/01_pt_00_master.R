@@ -15,8 +15,7 @@ pacman::p_load(
   "xml2",
   "jsonlite", # fromJSON
   "wikipediatrend", # Wikidata
-  "lubridate", # interval
-  "fuzzyjoin" # regex_full_join
+  "lubridate" # interval
 )
 
 try(setwd("scripts/"))
