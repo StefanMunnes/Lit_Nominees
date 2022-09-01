@@ -1,25 +1,20 @@
 
-# check for multiple years
-# 1. keep latest, or 2. see if all years in front, or 3. expected value in row
-
-
-# check: https://de.wikipedia.org/wiki/Bulletin_Jugend_%26_Literatur
-# add years for ingeborg bachman preis from url title
-# check chapter with many months and years and tables
-
 prizes_raw <- readRDS("../data/wp_prizes_raw.RDS")
 
 
 prizes_all <- prizes_raw |>
   mutate(
+    name = str_remove_all(name, "\\(.*?\\)") |> str_squish(),
     multi_year = str_detect(year, ";"), # check if keep just latest year
     year = case_when(
       title == "Walter-Kempowski-Literaturpreis" ~
         str_extract(h3, "[0-9]{4,4}"),
+      title == "Andreas-Gryphius-Preis" & multi_year == TRUE ~ "1970",
+      title == "Tukan-Preis" ~ str_extract(text, "^[0-9]{4,4}"),
+      str_detect(url_prize, "Bachmann-Preis_") ~
+        str_extract(url_prize, "[0-9]{4,4}$"),
       str_detect(text, "^[0-9]{4,4}.{1,3}(?![0-9])") ~
         str_extract(year, "^[0-9]{4,4}"),
-      title == "Andreas-Gryphius-Preis" & multi_year == TRUE ~
-        "1970",
       TRUE ~ year
     ),
     year = sapply(year, multi_years),
@@ -31,10 +26,12 @@ prizes_all <- prizes_raw |>
       str_detect(h2, "Jugendjury") ~ FALSE,
       str_detect(h2, "Jahrestagungen") ~ FALSE,
       str_detect(h2, "Schriftenreihe der ILG") ~ FALSE,
+      str_detect(h2, "Gastautoren") ~ FALSE,
       str_detect(h2, "Veranstaltungsreihen") ~ FALSE,
-      title == "Ingeborg-Bachmann-Preis" & str_detect(h2, "Preise") ~ FALSE,
+      title == "Ingeborg-Bachmann-Preis" ~ FALSE, # part of sub-pages with year
+      # title == "Ingeborg-Bachmann-Preis" & str_detect(h2, "Preise") ~ FALSE,
       title == "Theodor-Storm-Gesellschaft" ~ FALSE,
-      h2 == "Liste der Juroren des Leopold-Wandl-Preises (unvollständig)" ~ FALSE,
+      str_detect(h2, "Liste der Juroren") ~ FALSE,
       str_detect(h2, "Themenstellungen") ~ FALSE,
       str_detect(h2, "Sonderpreisjury") ~ FALSE,
       str_detect(name, "Frankfurter Buchmesse") ~ FALSE,
@@ -44,85 +41,71 @@ prizes_all <- prizes_raw |>
       str_detect(h2, "Anthologien") ~ FALSE,
       str_detect(h2, "Ausstellungskataloge") ~ FALSE,
       str_detect(h2, "Filmografie") ~ FALSE,
-      str_detect(h2, "Gemeinschaftswerke und Anthologien des Autorenkreises") ~ FALSE,
       str_detect(h3, "Bearbeitungen (in Auswahl)") ~ FALSE,
       str_detect(h3, "Übersetzungen (in Auswahl)") ~ FALSE,
+      tabhead == "Lateinamerikanische Preisträger" ~ FALSE,
       is.na(year) | year == "" ~ FALSE, # no year
       TRUE ~ TRUE
     ),
     link = url_decode_utf(link)
   ) |>
+  # remove unvalid observations
   filter(keep) |>
+  # split if multiple authors per row (= year)
   separate_rows(name, link, sep = ";") |>
+  # get year from long list of names with years in parantheses
+  mutate(
+    text = ifelse(
+      url_prize == "/wiki/Schweizerische_Schillerstiftung",
+      str_extract(text, paste(name, ".*?\\(.*?\\)")),
+      text
+    ),
+    year = ifelse(
+      url_prize == "/wiki/Schweizerische_Schillerstiftung",
+      get_years(text, "[0-9]{4,4}"),
+      year
+    )
+  ) |>
+  # remove observations from table with country in front of name
+  filter(!str_detect(name, "^(Deutschland|Österreich|Schweiz|Georgien)$")) |>
+  # split if multiple years of prize per author (= row)
   separate_rows(year, sep = ";") |>
   # manually correct wiki urls
-  mutate(link = case_when(
-    link == "/wiki/Volker_H._Altwasser" ~ "/wiki/Volker_Altwasser",
-    TRUE ~ link
-  ), link = str_squish(link))
-
-# check for names in text if no wiki link is provided
-# prizes_miss <- filter(prizes_all, is.na(link))
-
-# test <- sapply(dnb_authors_wiki$name, grep, prizes_miss$text) |>
-#   lapply(function(x) {
-#     paste(as.character(x), collapse = ";")
-#   })
+  mutate(
+    link = case_when(
+      link == "/wiki/Volker_H._Altwasser" ~ "/wiki/Volker_Altwasser",
+      TRUE ~ link
+    ) |> str_squish()
+  ) |>
+  # filter duplicates per price, chapter, name & year (no Sub-Chapters h3, h4)
+  distinct(url_prize, year, name, link, .keep_all = TRUE)
 
 
-
-# load list of wiki
-authors_wiki <- readRDS("../data/dnb_books_prize.RDS") |>
+# load list of authors wiki urls to match with long list of all prizes
+authors_wiki_url <- readRDS("../data/dnb_books_prize.RDS") |>
   distinct(name, wikipedia) |>
   transmute(link = wikipedia |>
     str_remove("https://de.wikipedia.org") |>
     url_decode_utf()) |>
   filter(link != "NA")
 
+# additionaly, get all prizes from authors without valid wiki url
+prizes_no_wiki <- prizes_all |>
+  filter(name %in% c(
+    "Carmen Buttjer", "Cihan Acar", "Gunther Neumann", "Sophie Albers",
+    "Ramona Raabe ", "Dimitrij Wall", "Martin Kordic"
+  ))
 
-authors_prizes_wiki <- left_join(authors_wiki, prizes_all, by = "link")
-
-authors_prizes_miss <- filter(authors_prizes_wiki, is.na(title))
-
-
-# /wiki/Alex_Capus missing -> aber Preise auf Personenseite
-# /wiki/Isabel_Fargo_Cole -> Nominierungen und Auszeichnung Übersetzung
-
-
-
-group_by(url_prize) |>
-  mutate(no_year_in_chapter = sum(!is.na(year)) == 0) |>
-  ungroup()
+# filter lsit of all prizes by authors wiki url & add prizes authors w/out link
+prizes_authors <- left_join(authors_wiki_url, prizes_all, by = "link") |>
+  rbind(prizes_no_wiki)
 
 
-
-chapters <- data.frame(table(prizes_all$h2[!prizes_all$keep]))
-
-
-test <- filter(prizes_all, !keep)
-test2 <- filter(prizes_all, multi_year)
+prizes_authors_miss <- filter(prizes_authors, is.na(title))
 
 
-# ! after split -> remove duplicates over prize and year (still some errors)
-
-prizes_clean <- filter(prizes_all, keep) |>
-  separate_rows(name, link, by = " ; ") |>
-  # remove authors without valid wiki pages
-  filter(!grepl("edit&redlink=1", link, TRUE))
+saveRDS(prizes_authors, file = "../data/wp_prizes_authos.RDS")
 
 
-
-
-# check for multiple years
-# 1. keep latest, or 2. see if all years in front, or 3. expected value in row
-
-
-a <- "1991;1992"
-
-b <- str_split(a, pattern = ";") |>
-  unlist() |>
-  as.numeric()
-
-if (length(b) == 2) {
-  if (diff(b, 1) < 2) max(b)
-}
+# ! Jury in Sublist
+# /wiki/Liste_der_Preisträger_und_Nominierten_des_Deutschen_Buchpreises
