@@ -8,7 +8,9 @@ nominees_pt <- readRDS("../data/nominees_pt.RDS")
 sent_topics <- readRDS("../data/sentiment_topics.RDS")
 
 # Publisher Information
-publisher <- read.csv("../data/publisherstatus/publisherstatus_new.csv", encoding = "UTF-8")
+publisher <- read.csv("../data/publisherstatus/publisherstatus_new.csv",
+  encoding = "UTF-8"
+)
 
 # Jury Information
 jury <- read_xlsx("../data/prizes_xlsx/Jury_allprices.xlsx") %>%
@@ -23,7 +25,7 @@ dnb_books <- readRDS("../data/dnb_books_prize.RDS") |>
   select(!match_id)
 
 # wikipedia data
-wiki_data_pre <- readRDS("../data/wikidata_pre.RDS")
+wikiviews_pre <- readRDS("../data/wikiviews_pre.RDS")
 
 
 
@@ -89,8 +91,3 @@ saveRDS(nominees, file = "../data/nominees.RDS")
 
 
 # SM: add dummy debüt + interaction (?)
-
-# SM: scrape Wikipedia:
-# https://de.wikipedia.org/wiki/Liste_deutscher_Literaturpreise
-# https://de.wikipedia.org/wiki/Liste_der_%C3%B6sterreichischen_Literaturpreise
-# https://de.wikipedia.org/wiki/Liste_Schweizer_Literaturpreise
