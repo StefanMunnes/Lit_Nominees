@@ -3,7 +3,6 @@
 
 # nominee data from perlentaucher
 authors_prizes <- readRDS("../data/nominees_pt.RDS") |>
-  mutate(url_name = clean(authors)) |>
   select(url_name, prize, ynom)
 
 # date of nomination, prize receipt and ceremony
@@ -13,7 +12,7 @@ dates <- read_xlsx("../data/preise_daten.xlsx") |>
 # author names with wikipedia urls
 dnb_authors_wiki <- readRDS("../data/dnb_books_prize.RDS") |>
   distinct(name, wikipedia) |>
-  mutate(url_name = clean(name) |> str_replace("-ravic-", "-ravik-"))
+  mutate(url_name = clean(name))
 
 
 # combine data -> year prize authors with date of long/short-list
@@ -77,12 +76,14 @@ wikiviews_pre <- wikiviews_pre_ls |>
     wv_mean_log = log(wv_mean)
   ) |>
   filter(row_number() == 1) |>
+  ungroup() |>
   full_join(authors_wiki_url, by = c("wikipedia", "prize", "ynom")) |>
+  mutate(wiki_url = url_decode_utf(wikipedia)) |>
   select(
     url_name, prize, ynom, longlist_date, shortlist_date, winner_announced,
     ceremony_date, interval, days,
     wv_sum, wv_sum_log, wv_mean, wv_mean_log,
-    wikipedia
+    wiki_url
   )
 
 
