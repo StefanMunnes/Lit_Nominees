@@ -37,7 +37,6 @@ wikiprizes_authors <- readRDS("../data/wp_prizes_authors.RDS") |>
       str_remove_all(wiki_url, "/w/index.php\\?title=|&action=edit&redlink=1")
   ) |>
   rename(wikiprizes_year = year)
-# wiki_url = ifelse(str_detect(wiki_url, "/wiki/"), wiki_url, clean(wiki_url))
 
 
 nominees <- nominees_pt |>
@@ -71,7 +70,7 @@ nominees <- nominees_pt |>
   group_by(url_name, prize, ynom) |>
   mutate(
     books_dnb_n = n(),
-    books_dnb_prev = sum(year_dnb < ynom),
+    books_dnb_prev = sum(year_dnb < ynom, na.rm = TRUE),
     no_dnb = is.na(title_dnb)
   ) |>
   filter(row_number() == 1) |>
@@ -103,15 +102,15 @@ nominees <- nominees_pt |>
   filter(row_number() == 1) |>
   ungroup() |>
   # keep just necessary variales
-  select(
-    authors, title_pt, subti, prize, ynom, shortlist, winner, debut,
+  dplyr::select(
+    authors, title, subti, prize, ynom, shortlist, winner, debut,
     jury_fem, nom_prize_n, nom_prize_prev,
     ybirth, ydeath, age_nom, female, language, academic, institute,
     revs_n, revs_fem, revs_n_nomis_st, senti_mean,
-    books_dnb_n, books_dnb_prev, books_pt_n, wikiviews_pre, wikiprizes_pre,
-    ypub, publisher, pub_place, starts_with("pub_rep"), # pages, price, type, isbn,
-    tags, tpcs, keyword_dnb, starts_with("topic_"), topics_orig,
-    shortlist_date, longlist_date, interval,
+    books_dnb_n, books_dnb_prev, books_pt_n, starts_with("wv_"), wikiprizes_pre,
+    ypub, publisher, pub_place, starts_with("pub_rep"),
+    starts_with("topic_"), topics_orig, tags, tpcs, keyword_dnb,
+    shortlist_date, longlist_date, wv_interval,
     url_name, url_book, match_id, no_pt, no_senttop
   )
 
