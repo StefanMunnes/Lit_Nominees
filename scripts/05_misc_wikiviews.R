@@ -12,12 +12,16 @@ dates <- read_xlsx("../data/preise_daten.xlsx") |>
 # author names with wikipedia urls
 dnb_authors_wiki <- readRDS("../data/dnb_books_prize.RDS") |>
   distinct(name, wikipedia) |>
-  mutate(url_name = clean(name))
+  transmute(
+    wiki_url = url_decode_utf(wikipedia),
+    url_name = clean(name)
+  )
 
 
 # combine data -> year prize authors with date of long/short-list
 authors_wiki_url <- left_join(authors_prizes, dates, by = c("prize", "ynom")) |>
-  full_join(dnb_authors_wiki, by = "url_name")
+  full_join(dnb_authors_wiki, by = "url_name") |>
+  filter(wiki_url != "NA") # remove authors without wikipedia url
 
 
 
@@ -25,7 +29,7 @@ authors_wiki_url <- left_join(authors_prizes, dates, by = c("prize", "ynom")) |>
 
 # 2.1 loop over list of wikipedia title pages
 wikiviews_pre_ls <- lapply(seq_len(nrow(authors_wiki_url)), function(row) {
-  url <- authors_wiki_url$wikipedia[row]
+  url <- authors_wiki_url$wiki_url[row]
   page <- str_remove(url, "^.*/wiki/")
 
   # get end date (depents on prize) & start date (12 month before)
@@ -42,7 +46,7 @@ wikiviews_pre_ls <- lapply(seq_len(nrow(authors_wiki_url)), function(row) {
 
   # create base data.frame with prize infos for matching
   df <- data.frame(
-    wikipedia = url,
+    wiki_url = url,
     prize = authors_wiki_url$prize[row],
     ynom = authors_wiki_url$ynom[row]
   )
@@ -66,22 +70,21 @@ wikiviews_pre_ls <- lapply(seq_len(nrow(authors_wiki_url)), function(row) {
 # 2.2 combine dfs, summarize new variables & merge with nominee names
 wikiviews_pre <- wikiviews_pre_ls |>
   bind_rows() |>
-  group_by(wikipedia, prize, ynom) |>
-  summarize(
-    days = ifelse(sum(!is.na(date)) == 0, NA, n()),
-    interval = ifelse(!is.na(days), paste(first(date), " - ", last(date)), NA),
+  group_by(wiki_url, prize, ynom) |>
+  summarise(
+    wv_days = sum(!is.na(date)),
+    wv_interval = paste(first(date), " - ", last(date)),
     wv_sum = sum(views, na.rm = TRUE),
-    wv_sum_log = log(views),
+    wv_sum_log = log(wv_sum),
     wv_mean = mean(views, na.rm = TRUE),
     wv_mean_log = log(wv_mean)
   ) |>
-  filter(row_number() == 1) |>
+  mutate(wv_interval = na_if(wv_days, 0)) |>
   ungroup() |>
-  full_join(authors_wiki_url, by = c("wikipedia", "prize", "ynom")) |>
-  mutate(wiki_url = url_decode_utf(wikipedia)) |>
+  full_join(authors_wiki_url, by = c("wiki_url", "prize", "ynom")) |>
   select(
     url_name, prize, ynom, longlist_date, shortlist_date, winner_announced,
-    ceremony_date, interval, days,
+    ceremony_date, wv_interval, wv_days,
     wv_sum, wv_sum_log, wv_mean, wv_mean_log,
     wiki_url
   )
