@@ -30,13 +30,13 @@ wikiviews_pre <- readRDS("../data/wikiviews_pre.RDS")
 
 # all prizes/nominations from wikipedia (before nomination)
 wikiprizes_authors <- readRDS("../data/wp_prizes_authors.RDS") |>
-  select(wiki_url, year) |>
   # prepare missings in url with url_name
   mutate(
     wiki_url =
-      str_remove_all(wiki_url, "/w/index.php\\?title=|&action=edit&redlink=1")
+      str_remove_all(wiki_url, "/w/index.php\\?title=|&action=edit&redlink=1"),
+    wikiprizes_year = as.numeric(year)
   ) |>
-  rename(wikiprizes_year = year)
+  select(wiki_url, wikiprizes_year)
 
 
 nominees <- nominees_pt |>
@@ -58,6 +58,16 @@ nominees <- nominees_pt |>
     publisher == "Rowohlt Berlin Verlag" ~ "Rowohlt Verlag",
     publisher == "Matthes und Seitz Berlin" ~ "Matthes und Seitz",
     publisher == "Galiani Verlag" ~ "Galiani Verlag Berlin",
+    publisher == "Blumenbar" ~ "Blumenbar Verlag",
+    publisher == "Jung und Jung" ~ "Jung und Jung Verlag",
+    publisher == "Picus" ~ "Picus Verlag",
+    publisher == "Piper" ~ "Piper Verlag",
+    publisher == "Rowohlt" ~ "Rowohlt Verlag",
+    publisher == "Rowohlt Berlin" ~ "Rowohlt Verlag",
+    publisher == "S. Fischer" ~ "S. Fischer Verlag",
+    publisher == "Schöffling" ~ "Schöffling und Co. Verlag",
+    publisher == "Suhrkamp" ~ "Suhrkamp Verlag",
+    publisher == "Zsolnay" ~ "Zsolnay Verlag",
     TRUE ~ publisher
   )) |>
   left_join(publisher, by = "publisher") |>
@@ -97,8 +107,7 @@ nominees <- nominees_pt |>
   ) |>
   full_join(wikiprizes_authors, by = "wiki_url") |>
   group_by(url_name, prize, ynom) |>
-  arrange(wikiprizes_year) |>
-  mutate(wikiprizes_pre = sum(wikiprizes_year < ynom)) |>
+  mutate(wikiprizes_pre = sum(wikiprizes_year < ynom, na.rm = TRUE)) |>
   filter(row_number() == 1) |>
   ungroup() |>
   # keep just necessary variales
