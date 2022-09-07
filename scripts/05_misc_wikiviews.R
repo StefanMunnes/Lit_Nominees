@@ -79,7 +79,10 @@ wikiviews_pre <- wikiviews_pre_ls |>
     wv_mean = mean(views, na.rm = TRUE),
     wv_mean_log = log(wv_mean)
   ) |>
-  mutate(wv_interval = na_if(wv_days, 0)) |>
+  mutate(wv_interval = case_when(
+    wv_days == 0 ~ NA_character_,
+    TRUE ~ wv_interval
+  )) |>
   ungroup() |>
   full_join(authors_wiki_url, by = c("wiki_url", "prize", "ynom")) |>
   select(
