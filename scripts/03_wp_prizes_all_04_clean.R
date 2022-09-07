@@ -55,6 +55,7 @@ prizes_all <- prizes_raw |>
   separate_rows(name, wiki_url, sep = ";") |>
   # get year from long list of names with years in parantheses
   mutate(
+    name = str_squish(name),
     text = ifelse(
       url_prize == "/wiki/Schweizerische_Schillerstiftung",
       str_extract(text, paste(name, ".*?\\(.*?\\)")),
@@ -96,12 +97,13 @@ prizes_no_wiki <- prizes_all |>
     "Ramona Raabe ", "Dimitrij Wall", "Martin Kordic"
   ))
 
-# filter list of all prizes by authors wiki url & add prizes authors w/out wiki_url
+# filter list of all prizes by authors wiki url & add prizes authors w/out url
 prizes_authors <- left_join(authors_wiki_url, prizes_all, by = "wiki_url") |>
   rbind(prizes_no_wiki) |>
   mutate(keep = case_when(
     # exclude some translations
-    str_detect(text, "Übersetzung") & title == "Hamburger Literaturpreise" ~ FALSE,
+    str_detect(text, "Übersetzung") & title == "Hamburger Literaturpreise"
+    ~ FALSE,
     str_detect(text, "Übersetzung") & name == "Olaf Kühl" ~ FALSE,
     str_detect(text, "Übersetzung") & name == "Karl Rühmann" ~ FALSE,
 
