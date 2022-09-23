@@ -68,6 +68,7 @@ nominees <- nominees_pt |>
     publisher == "Schöffling" ~ "Schöffling und Co. Verlag",
     publisher == "Suhrkamp" ~ "Suhrkamp Verlag",
     publisher == "Zsolnay" ~ "Zsolnay Verlag",
+    publisher == "DVA" ~ "Deutsche Verlags-Anstalt (DVA)",
     TRUE ~ publisher
   )) |>
   left_join(publisher, by = "publisher") |>
