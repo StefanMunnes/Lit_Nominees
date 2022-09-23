@@ -116,7 +116,7 @@ nominees <- nominees_pt |>
     authors, title, subti, prize, ynom, shortlist, winner, debut,
     jury_fem, nom_prize_n, nom_prize_prev,
     ybirth, ydeath, age_nom, female, language, academic, institute,
-    revs_n, revs_fem, revs_n_nomis_st, senti_mean,
+    revs_n, revs_fem, revs_n_nomis_st, senti_mean, senti_vari,
     books_dnb_n, books_dnb_prev, books_pt_n, starts_with("wv_"), wikiprizes_pre,
     ypub, publisher, pub_place, starts_with("pub_rep"),
     starts_with("topic_"), topics_orig, tags, tpcs, keyword_dnb,

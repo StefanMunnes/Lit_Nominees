@@ -91,7 +91,10 @@ sent_topics <- inner_join(shiny_raw, revs_book_url, by = "text") |>
   ) |>
   # calculate mean sentiment: group also by prize & year
   group_by(url_book, prize, ynom) |>
-  mutate(senti_mean = round(mean(Sentiment, na.rm = TRUE), 2)) |>
+  mutate(
+    senti_mean = round(mean(Sentiment, na.rm = TRUE), 2),
+    senti_vari = round(var(Sentiment, na.rm = TRUE), 2)
+  ) |>
   # keep just the one observation per rater with topic included
   # can't just filter over NA; sometimes topics missing, keep at least one row
   group_by(url_book, rater, prize, ynom) |>
@@ -108,7 +111,8 @@ sent_topics <- inner_join(shiny_raw, revs_book_url, by = "text") |>
   # categorize topics
   mutate(
     topics_tmp = str_remove_all(topics_orig, "[ ()-]"),
-    topics_tmp = stri_replace_all(topics_tmp,
+    topics_tmp = stri_replace_all(
+      topics_tmp,
       regex = paste0("\\b", codes$original, "\\b"),
       replacement = codes$final,
       vectorize_all = FALSE
@@ -144,7 +148,7 @@ sent_topics <- inner_join(shiny_raw, revs_book_url, by = "text") |>
   ) |>
   select(
     title, url_book, revs_n_st, revs_n_nomis_st, rater_n_st,
-    senti_mean, starts_with("topic_"), topics_orig, prize, ynom
+    senti_mean, senti_vari, starts_with("topic_"), topics_orig, prize, ynom
   )
 
 
