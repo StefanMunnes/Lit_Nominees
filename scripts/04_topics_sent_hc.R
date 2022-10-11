@@ -137,15 +137,6 @@ sent_topics <- inner_join(shiny_raw, revs_book_url, by = "text") |>
   mutate(topics_orig = paste(topics_orig, collapse = "|")) |>
   filter(row_number() == 1) |>
   ungroup() |>
-  # add topics from keywords/blurb for books (match_id) with not enough topics
-  full_join(codes_mi, by = "match_id") |>
-  mutate(
-    topic_history = ifelse(!is.na(A), TRUE, topic_history),
-    topic_politics = ifelse(!is.na(B), TRUE, topic_politics),
-    topic_relations = ifelse(!is.na(C), TRUE, topic_relations),
-    topic_identity = ifelse(!is.na(D), TRUE, topic_identity),
-    topic_culture = ifelse(!is.na(E), TRUE, topic_culture)
-  ) |>
   select(
     title, url_book, revs_n_st, revs_n_nomis_st, rater_n_st,
     senti_mean, senti_vari, starts_with("topic_"), topics_orig, prize, ynom

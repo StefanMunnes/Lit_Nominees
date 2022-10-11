@@ -50,6 +50,18 @@ nominees <- nominees_pt |>
   # 43x no sent/topics (2x with pt-revs, 41 without pt-revs)
 
   filter(!no_prize) |>
+  
+  # add topics from keywords/blurb for books (match_id) with not enough topics
+  full_join(codes_mi, by = "match_id") |>
+  mutate(
+    topic_history = ifelse(!is.na(A), TRUE, topic_history),
+    topic_politics = ifelse(!is.na(B), TRUE, topic_politics),
+    topic_relations = ifelse(!is.na(C), TRUE, topic_relations),
+    topic_identity = ifelse(!is.na(D), TRUE, topic_identity),
+    topic_culture = ifelse(!is.na(E), TRUE, topic_culture),
+    across(starts_with("topic_"), ~ ifelse(is.na(.x), FALSE, .x))
+  ) |>
+  
   # 2. add gender share of jury
   left_join(jury, by = c("ynom", "prize")) |>
   # 3. add publisher reputation
