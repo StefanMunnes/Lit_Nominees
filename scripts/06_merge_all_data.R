@@ -8,6 +8,11 @@ nominees_pt <- readRDS("../data/nominees_pt.RDS")
 sent_topics <- readRDS("../data/sentiment_topics.RDS") |>
   distinct(across(url_book:topics_orig))
 
+# missing topics
+codes_mi <- read.csv("../data/topics_hc_mi.csv", encoding = "UTF-8") |>
+  select(match_id, value) |>
+  pivot_wider(names_from = "value")
+
 # Publisher Information
 publisher <- read.csv("../data/publisherstatus/publisherstatus_new.csv",
   encoding = "UTF-8"
@@ -50,7 +55,6 @@ nominees <- nominees_pt |>
   # 43x no sent/topics (2x with pt-revs, 41 without pt-revs)
 
   filter(!no_prize) |>
-  
   # add topics from keywords/blurb for books (match_id) with not enough topics
   full_join(codes_mi, by = "match_id") |>
   mutate(
@@ -61,7 +65,6 @@ nominees <- nominees_pt |>
     topic_culture = ifelse(!is.na(E), TRUE, topic_culture),
     across(starts_with("topic_"), ~ ifelse(is.na(.x), FALSE, .x))
   ) |>
-  
   # 2. add gender share of jury
   left_join(jury, by = c("ynom", "prize")) |>
   # 3. add publisher reputation
@@ -88,6 +91,10 @@ nominees <- nominees_pt |>
     pub_reputation = reputation,
     pub_reputation_mean = mean_reputation
   ) |>
+  mutate(pub_reputation = case_when(
+    is.na(pub_reputation) & !is.na(publisher) ~ FALSE,
+    TRUE ~ pub_reputation
+  )) |>
   # 4. number of books before nomination (by list of DNB books)
   full_join(dnb_books, by = "url_name") |>
   group_by(url_name, prize, ynom) |>

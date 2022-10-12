@@ -42,11 +42,6 @@ codes <- read.csv("../data/topics_hc.csv", encoding = "UTF-8") |>
   select(original, final) |>
   mutate(original = str_remove_all(original, "[ ()-]"))
 
-# topics from keywords/blurb for books (match_id) with none/not enough topics
-codes_mi <- read.csv("../data/topics_hc_mi.csv", encoding = "UTF-8") |>
-  select(match_id, value) |>
-  pivot_wider(names_from = "value")
-
 
 
 # ---- 3. clean raw shiny data ----
