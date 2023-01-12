@@ -1,7 +1,7 @@
-
 if (!require("pacman")) install.packages("pacman")
+
 pacman::p_load(
-  "readxl", # read_xlsx()
+  "readxl",
   "tidyr", # separate(), pivot_longer()
   "dplyr", # mutate(), distinct(), full_join()
   "stringr", # str_detect(), str_replace(), str_extract()
@@ -15,7 +15,9 @@ pacman::p_load(
   "xml2",
   "jsonlite", # fromJSON
   "wikipediatrend", # Wikidata
-  "lubridate" # interval
+  "lubridate", # interval
+  "stargazer",
+  "haven"
 )
 
 try(setwd("scripts/"))
