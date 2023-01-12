@@ -84,6 +84,7 @@ nominees <- nominees_pt |>
     publisher == "Suhrkamp" ~ "Suhrkamp Verlag",
     publisher == "Zsolnay" ~ "Zsolnay Verlag",
     publisher == "DVA" ~ "Deutsche Verlags-Anstalt (DVA)",
+    match_id == "konstantin-kuespert_rechtes-de_46" ~ "Suhrkamp",
     TRUE ~ publisher
   )) |>
   left_join(publisher, by = "publisher") |>
@@ -142,8 +143,7 @@ nominees <- nominees_pt |>
     shortlist_date, longlist_date, wv_interval,
     url_name, url_book, match_id, no_pt, no_senttop
   )
-
-
+  
 saveRDS(nominees, file = "../data/nominees.RDS")
 
 
