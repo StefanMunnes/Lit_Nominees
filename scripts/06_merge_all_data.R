@@ -9,7 +9,7 @@ sent_topics <- readRDS("../data/sentiment_topics.RDS") |>
   distinct(across(url_book:topics_orig))
 
 # missing topics
-codes_last_miss  <- read_xlsx("../data/topics_last_miss.xlsx") |>
+codes_last_miss <- read_xlsx("../data/topics_last_miss.xlsx") |>
   pivot_wider(names_from = "value")
 
 codes_mi <- read.csv("../data/topics_hc_mi.csv", encoding = "UTF-8") |>
@@ -147,7 +147,7 @@ nominees <- nominees_pt |>
     shortlist_date, longlist_date, wv_interval,
     url_name, url_book, match_id, no_pt, no_senttop, poetry
   )
-  
+
 saveRDS(nominees, file = "../data/nominees.RDS")
 
 

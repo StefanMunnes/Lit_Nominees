@@ -1,3 +1,4 @@
+
 nominees <- readRDS("../data/nominees.RDS")
 
 nominees <- nominees |>
@@ -53,13 +54,15 @@ nominees <- nominees |>
     nonfiction = case_when(
       poetry == "Y" ~ TRUE,
       str_detect(tpcs, "Lyrik") ~ TRUE,
-      str_detect(topics_orig, "Biografie") ~ TRUE,
-      str_detect(topics_orig, "Autobiografie") ~ TRUE,
-      str_detect(topics_orig, "Lyrik") ~ TRUE,
+      str_detect(topics_orig, "Biografie|Autobiografie|Lyrik") ~ TRUE,
       TRUE ~ FALSE
-    )
-  ) |>
-  select(!c(group_jury, group_revs))
+    ),
+    # revs N -> NA to 0
+    revs_n = ifelse(is.na(revs_n), 0, revs_n),
+    # create Zeitgeist variables
+    metoo = ifelse(ynom < 2017, "Before #metoo", "After #metoo"),
+    syria = ifelse(ynom < 2015, "Before 2015", "After 2015")
+  )
 
 # Save dataset
 saveRDS(nominees, file = "../data/nominees.RDS")
