@@ -1,7 +1,7 @@
 
 nominees <- readRDS("../data/nominees.RDS")
 
-nominees <- nominees |>
+nominees_rec <- nominees |>
   # Recode language
   mutate(
     language_german = case_when(
@@ -60,14 +60,14 @@ nominees <- nominees |>
     # revs N -> NA to 0
     revs_n = ifelse(is.na(revs_n), 0, revs_n),
     # create Zeitgeist variables
-    metoo = ifelse(ynom < 2017, "Before #metoo", "After #metoo")  |> 
-    factor(level = c("Before #metoo", "After #metoo")),
-    syria = ifelse(ynom < 2015, "Before 2015", "After 2015") |> 
-    factor(level = c("Before 2015", "After 2015"))
+    metoo = ifelse(ynom < 2017, "Before #metoo", "After #metoo") |>
+      factor(level = c("Before #metoo", "After #metoo")),
+    syria = ifelse(ynom < 2015, "Before 2015", "After 2015") |>
+      factor(level = c("Before 2015", "After 2015"))
   )
 
 # Save dataset
-saveRDS(nominees, file = "../data/nominees.RDS")
+saveRDS(nominees_rec, file = "../data/nominees_rec.RDS")
 
 # Export to Stata
-write_dta(nominees, path = "../data/nominees.dta", version = 15)
+write_dta(nominees_rec, path = "../data/nominees_rec.dta", version = 15)
