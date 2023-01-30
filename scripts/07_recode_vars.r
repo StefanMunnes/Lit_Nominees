@@ -42,9 +42,9 @@ nominees_rec <- nominees |>
     senti_vari = ifelse(!is.na(senti_mean) & is.na(senti_vari), 0, senti_vari),
     # gen homophily variable
     homophily = case_when(
-      jury_group == "male" & female == FALSE ~ 1,
-      jury_group == "female" & female == TRUE ~ 1,
-      TRUE ~ 0
+      jury_group == "male" & female == FALSE ~ TRUE,
+      jury_group == "female" & female == TRUE ~ TRUE,
+      TRUE ~ FALSE
     ),
     # wikiviews
     wv_mean = ifelse(is.na(wv_mean) | wv_mean == 0, 1, wv_mean),
@@ -63,7 +63,20 @@ nominees_rec <- nominees |>
     metoo = ifelse(ynom < 2017, "Before #metoo", "After #metoo") |>
       factor(level = c("Before #metoo", "After #metoo")),
     syria = ifelse(ynom < 2015, "Before 2015", "After 2015") |>
-      factor(level = c("Before 2015", "After 2015"))
+      factor(level = c("Before 2015", "After 2015")),
+    # create two dimensional variables from metric ones
+    across(
+      c(revs_n, senti_mean, senti_vari, wv_mean),
+      ~ case_when(
+        is.na(.x) ~ "none",
+        .x < mean(.x, na.rm = TRUE)
+        ~ sprintf("< mean (%.1f)", mean(.x, na.rm = TRUE)),
+        .x > mean(.x, na.rm = TRUE)
+        ~ sprintf("> mean (%.1f)", mean(.x, na.rm = TRUE))
+      ) |>
+        as.ordered(),
+      .names = "{.col}_cat"
+    )
   )
 
 # Save dataset
