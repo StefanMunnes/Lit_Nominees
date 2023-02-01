@@ -4,20 +4,24 @@ p_load("arsenal")
 # load data
 nominees <- readRDS("../data/nominees_rec.RDS")
 
-noms_all <- mutate(nominees,
-  winner = "All Nominees"
-)
-
-# prep different data.frames for different tables
-# nominees_all <- nominees |>
-#   mutate(winner = FALSE) |>
-#   bind_rows(nominees[nominees$winner, ]) |>
-#   mutate(winner = ifelse(winner, "Winner", "All Nominees"))
+# prep by-variable and labels for categories
+noms_all <- nominees |>
+  mutate(
+    winner = "All Nominations",
+    senti_mean_cat = factor(senti_mean_cat,
+      levels = c("none", levels(nominees$senti_mean_cat)[1:2])
+    ),
+    senti_vari_cat = factor(senti_vari_cat,
+      levels = c("none", levels(nominees$senti_vari_cat)[1:2])
+    )
+  )
+levels(noms_all$prevbooks) <- c("none", "medium (1-10)", "many (>10)")
+levels(noms_all$prevprize) <- c("none", "medium (1-7)", "many (>7)")
 
 
 # prep varlist and table options
 varlist <- winner ~ revs_n_cat + senti_mean_cat + senti_vari_cat + wv_mean_cat +
-  pub_reputation + prevbooks + prevprize + nom_prize_prev +
+  prevbooks + prevprize + pub_reputation + nom_prize_prev +
   topic_history + topic_politics + topic_relations + topic_identity +
   topic_culture +
   female + homophily + language_german + debut + nonfiction
@@ -25,14 +29,17 @@ varlist <- winner ~ revs_n_cat + senti_mean_cat + senti_vari_cat + wv_mean_cat +
 
 tableby(varlist, data = noms_all, total = FALSE, cat.simplify = TRUE) |>
   set_labels(list(
-    revs_n_cat = "# Reviews",
+    revs_n_cat = sprintf("# Reviews %s", levels(noms_all$revs_n_cat)[2]),
     senti_mean_cat = "Review sentiment",
     senti_vari_cat = "Variance sentiment",
-    wv_mean_cat = "Wikipedia Views",
-    pub_reputation = "Publisher Reputation",
+    wv_mean_cat = sprintf(
+      "Wikipedia views %s",
+      levels(noms_all$wv_mean_cat)[2]
+    ),
+    pub_reputation = "High Publisher Reputation",
     prevbooks = "# previous books",
     prevprize = "# previous prizes",
-    nom_prize_prev = "# previous nominations",
+    nom_prize_prev = "Previously nominated",
     topic_history = "Topic: History",
     topic_politics = "Topic: Politics",
     topic_relations = "Topic: Relations",
@@ -48,8 +55,3 @@ tableby(varlist, data = noms_all, total = FALSE, cat.simplify = TRUE) |>
     file = "tab_nominees_vars.doc",
     keep.md = FALSE
   )
-
-
-c <- tableby(varlist, data = noms_all, control = controls, cat.simplify = TRUE)
-
-summary(c, text = TRUE)
