@@ -68,7 +68,7 @@ nominees_rec <- nominees |>
     across(
       c(
         revs_n, senti_mean, senti_vari, wv_mean, pub_reputation_mean,
-        wikiprizes_pre, wikiprizes_pre
+        wikiprizes_pre, books_dnb_prev
       ),
       ~ case_when(
         is.na(.x) ~ "none",
