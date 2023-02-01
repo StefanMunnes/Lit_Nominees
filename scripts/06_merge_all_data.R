@@ -97,7 +97,7 @@ nominees <- nominees_pt |>
     pub_reputation_mean = mean_reputation
   ) |>
   mutate(pub_reputation = case_when(
-    is.na(pub_reputation) & !is.na(publisher) ~ FALSE,
+    is.na(pub_reputation) ~ FALSE,
     TRUE ~ pub_reputation
   )) |>
   # 4. number of books before nomination (by list of DNB books)
@@ -149,6 +149,3 @@ nominees <- nominees_pt |>
   )
 
 saveRDS(nominees, file = "../data/nominees.RDS")
-
-
-# SM: add dummy debüt + interaction (?)
