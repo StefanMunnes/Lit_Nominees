@@ -66,7 +66,10 @@ nominees_rec <- nominees |>
       factor(level = c("Before 2015", "After 2015")),
     # create two dimensional variables from metric ones
     across(
-      c(revs_n, senti_mean, senti_vari, wv_mean),
+      c(
+        revs_n, senti_mean, senti_vari, wv_mean, pub_reputation_mean,
+        wikiprizes_pre, wikiprizes_pre
+      ),
       ~ case_when(
         is.na(.x) ~ "none",
         .x < mean(.x, na.rm = TRUE)
@@ -74,7 +77,7 @@ nominees_rec <- nominees |>
         .x > mean(.x, na.rm = TRUE)
         ~ sprintf("> mean (%.1f)", mean(.x, na.rm = TRUE))
       ) |>
-        as.ordered(),
+        as.factor(),
       .names = "{.col}_cat"
     )
   )
