@@ -6,8 +6,8 @@ noms_all <- readRDS("../data/nominees_rec.RDS") |>
   mutate(winner = "All Nominations")
 
 # add cut-offs to label
-levels(noms_all$prevbooks) <- c("none", "medium (1-10)", "many (>10)")
-levels(noms_all$prevprize) <- c("none", "medium (1-7)", "many (>7)")
+# levels(noms_all$prevbooks) <- c("none", "medium (1-10)", "many (>10)")
+# levels(noms_all$prevprize) <- c("none", "medium (1-7)", "many (>7)")
 
 
 # prep varlist and table options
