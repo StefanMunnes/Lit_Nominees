@@ -11,7 +11,8 @@ levels(noms_all$prevprize) <- c("none", "medium (1-7)", "many (>7)")
 
 
 # prep varlist and table options
-varlist <- winner ~ revs_n_cat + senti_mean_cat + senti_vari_cat + wv_mean_cat +
+varlist <- winner ~ revs_n_cat + senti_qual_cat + wv_mean_cat +
+  # senti_mean_cat + senti_vari_cat +
   books_dnb_prev_cat + wikiprizes_pre_cat + # prevbooks + prevprize +
   pub_reputation + nom_prize_prev +
   topic_history + topic_politics + topic_relations + topic_identity +
@@ -22,6 +23,7 @@ varlist <- winner ~ revs_n_cat + senti_mean_cat + senti_vari_cat + wv_mean_cat +
 tableby(varlist, data = noms_all, total = FALSE, cat.simplify = TRUE) |>
   set_labels(list(
     revs_n_cat = sprintf("# Reviews %s", levels(noms_all$revs_n_cat)[2]),
+    senti_qual_cat = "Review Quality",
     senti_mean_cat = "Review sentiment",
     senti_vari_cat = "Variance sentiment",
     wv_mean_cat = sprintf(

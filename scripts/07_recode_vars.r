@@ -79,7 +79,21 @@ nominees_rec <- nominees |>
         as.factor(),
       .names = "{.col}_cat"
     ),
-    across(senti_mean_cat:senti_vari_cat, relevel, "none")
+    across(senti_mean_cat:senti_vari_cat, relevel, "none"),
+    senti_qual_cat = case_when(
+      senti_mean_cat == "none" ~ "none",
+      senti_mean_cat == "< mean (5.6)" & senti_vari_cat == "< mean (2.1)"
+      ~ "clearly low",
+      senti_mean_cat == "< mean (5.6)" & senti_vari_cat == "> mean (2.1)"
+      ~ "disputed low",
+      senti_mean_cat == "> mean (5.6)" & senti_vari_cat == "> mean (2.1)"
+      ~ "disputed high",
+      senti_mean_cat == "> mean (5.6)" & senti_vari_cat == "< mean (2.1)"
+      ~ "clearly high"
+    ) |>
+      factor(levels = c(
+        "none", "clearly low", "disputed low", "disputed high", "clearly high"
+      ))
   )
 
 
