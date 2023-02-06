@@ -5,40 +5,37 @@ nominees_rec <- nominees |>
   mutate(
     # revs N -> NA to 0
     revs_n = ifelse(is.na(revs_n), 0, revs_n),
-    # sentiment variation 0 if no variation but valid sentiment values
-    senti_vari = ifelse(!is.na(senti_mean) & is.na(senti_vari), 0, senti_vari),
-    # wikiviews NA = 0 & topcoding to erase extrem values
+    # wikiviews NA = 0
     wv_mean = ifelse(is.na(wv_mean), 0, wv_mean),
     # wv_mean = ifelse(wv_mean > 100, 100, wv_mean),
     # create two dimensional variables from metric ones
     across(
-      c(
-        revs_n, senti_mean, senti_vari, wv_mean,
-        wikiprizes_pre, books_dnb_prev
-      ),
+      c(revs_n, wv_mean, wikiprizes_pre, books_dnb_prev),
       ~ case_when(
         is.na(.x) ~ "none",
-        .x <= median(.x, na.rm = TRUE) ~ "<= median",
-        # ~ sprintf("<= median (%.1f)", median(.x, na.rm = TRUE)),
-        .x > median(.x, na.rm = TRUE) ~ "> median"
-        # ~ sprintf("> median (%.1f)", median(.x, na.rm = TRUE))
+        .x <= median(.x, na.rm = TRUE)
+        ~ sprintf("<= median (%.1f)", median(.x, na.rm = TRUE)),
+        .x > median(.x, na.rm = TRUE)
+        ~ sprintf("> median (%.1f)", median(.x, na.rm = TRUE))
       ) |>
         as.factor(),
       .names = "{.col}_cat"
     ),
-    across(senti_mean_cat:senti_vari_cat, relevel, "none"),
+    # across(senti_mean_cat:senti_vari_cat, relevel, "none"),
+    # sentiment variation 0 if no variation but valid sentiment values
+    senti_vari = ifelse(!is.na(senti_mean) & is.na(senti_vari), 0, senti_vari),
     senti_qual_cat = case_when(
-      senti_mean_cat == "none" ~ "none",
-      senti_mean_cat == "<= median" & senti_vari_cat == "<= median"
-      ~ "clearly low",
-      senti_mean_cat == "<= median" & senti_vari_cat == "> median"
-      ~ "disputed low",
-      senti_mean_cat == "> median" & senti_vari_cat == "> median"
-      ~ "disputed high",
-      senti_mean_cat == "> median" & senti_vari_cat == "<= median"
-      ~ "clearly high"
+      is.na(senti_mean) ~ 0,
+      senti_mean <= mean(senti_mean, na.rm = TRUE) &
+        senti_vari <= mean(senti_vari, na.rm = TRUE) ~ 1,
+      senti_mean <= mean(senti_mean, na.rm = TRUE) &
+        senti_vari > mean(senti_vari, na.rm = TRUE) ~ 2,
+      senti_mean > mean(senti_mean, na.rm = TRUE) &
+        senti_vari > mean(senti_vari, na.rm = TRUE) ~ 3,
+      senti_mean > mean(senti_mean, na.rm = TRUE) &
+        senti_vari <= mean(senti_vari, na.rm = TRUE) ~ 4
     ) |>
-      factor(levels = c(
+      factor(labels = c(
         "none", "clearly low", "disputed low", "disputed high", "clearly high"
       )) |>
       relevel(ref = "clearly low"),
