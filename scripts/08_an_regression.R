@@ -20,7 +20,7 @@ model_formulars <- c(
     pub_reputation_mean_cat + wv_mean_cat +
     topic_history + topic_culture + topic_identity + topic_politics +
     topic_relations + female * metoo + language_german * syria +
-    metoo * homophily + debut + nonfiction
+    metoo * jury_preference + debut + nonfiction
 )
 
 models_lm <- lapply(model_formulars, function(m) {
@@ -38,7 +38,7 @@ plot_groups <- list(
     "Wikipedia Views (ref. median <= 8.6)"
   ),
   c("Topics", "History", "Dummy: Nonfiction"),
-  c("Zeitgeist/Jury", "Female", "Jury Homophily")
+  c("Zeitgeist/Jury", "Female", "Male Jury, male winner (ref. even jury)")
 )
 
 plot_lm <- models_lm[[6]] |>
@@ -85,7 +85,15 @@ plot_lm <- models_lm[[6]] |>
       nonfiction = "Dummy: Nonfiction",
       female = "Female",
       language_german = "German Background",
-      homophily = "Jury Homophily"
+      homophily = "Jury Homophily",
+      "jury_preferencefemale to female" =
+        "Female Jury, female winner (ref. even jury)",
+      "jury_preferencefemale to male" =
+        "Female Jury, male winner (ref. even jury)",
+      "jury_preferencemale to female" =
+        "Male Jury, female winner (ref. even jury)",
+      "jury_preferencemale to male" =
+        "Male Jury, male winner (ref. even jury)"
     )
   ) +
   theme_bw(base_size = 20) + xlab("Coefficient Estimate") + ylab("") +
@@ -139,6 +147,7 @@ stargazer(models_lm,
 
 
 
+
 cl_vcov_mat <- vcovCL(models_lm[[6]], cluster = ~prize)
 
 
@@ -167,8 +176,8 @@ predicts_2_df <- function(vars,
 
 
 
-predicts_2_df(c("language_german", "syria")) |>
-  ggplot(aes(x = syria, y = Prediction, color = as.factor(language_german))) +
+predicts_2_df(c("jury_preference", "metoo")) |>
+  ggplot(aes(x = metoo, y = Prediction, color = as.factor(jury_preference))) +
   geom_pointrange(
     aes(ymin = lower, ymax = upper),
     position = position_dodge(.2)
@@ -181,7 +190,32 @@ predicts_2_df(c("language_german", "syria")) |>
 
 ################################################################################
 
+model_log <- glm(model_formulars[[6]], data = nominees_an, family = "binomial")
 
+margins <- margins_summary(model_log)
+
+ggplot(margins[margins$factor != "female", ], aes(y = factor, x = AME)) +
+  geom_pointrange(
+    aes(xmin = lower, xmax = upper)
+  )
+
+cl_vcov_mat_log <- vcovCL(model_log, cluster = ~prize)
+
+
+predicts_2_df(
+  c("jury_preference", "metoo"),
+  mod = model_log, vcov_mat = cl_vcov_mat_log
+) |>
+  ggplot(aes(x = metoo, y = Prediction, color = as.factor(jury_preference))) +
+  geom_pointrange(
+    aes(ymin = lower, ymax = upper),
+    position = position_dodge(.2)
+  )
+
+
+
+
+################################################################################
 
 models_log <- lapply(model_formulars, function(m) {
   glm(m, data = nominees, family = "binomial")
