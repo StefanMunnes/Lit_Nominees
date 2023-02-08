@@ -16,7 +16,7 @@ varlist <- winner_all ~ winner + revs_n_cat + senti_qual_cat +
   pub_reputation_mean_cat + wv_mean_cat +
   topic_history + topic_politics + topic_relations + topic_identity +
   topic_culture + nonfiction +
-  female + homophily + language_german + debut
+  female + jury_preference + language_german + debut
 
 
 tableby(varlist, data = noms_all, total = FALSE, cat.simplify = TRUE) |>
@@ -48,7 +48,7 @@ tableby(varlist, data = noms_all, total = FALSE, cat.simplify = TRUE) |>
       topic_culture = "Topic: Culture",
       nonfiction = "Nonfiction",
       female = "Female",
-      homophily = "Jury Homophily",
+      jury_preference = "Jury Preference",
       language_german = "German Background",
       debut = "Debut"
     )
@@ -57,3 +57,7 @@ tableby(varlist, data = noms_all, total = FALSE, cat.simplify = TRUE) |>
     file = "tab_nominees_vars.doc",
     keep.md = FALSE
   )
+
+
+file.copy("tab_nominees_vars.doc", "../output/tables/", overwrite = TRUE)
+file.remove("tab_nominees_vars.doc")
