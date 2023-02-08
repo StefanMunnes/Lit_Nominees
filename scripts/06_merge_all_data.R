@@ -89,7 +89,7 @@ nominees <- nominees_pt |>
     publisher == "Zsolnay" ~ "Zsolnay Verlag",
     publisher == "DVA" ~ "Deutsche Verlags-Anstalt (DVA)",
     match_id == "konstantin-kuespert_rechtes-de_46" ~ "Suhrkamp",
-    TRUE ~ publisher
+    .default ~ publisher
   )) |>
   left_join(publisher, by = "publisher") |>
   rename(pub_reputation_mean = mean_reputation) |>

@@ -46,20 +46,20 @@ nominees_rec <- nominees |>
     homophily = case_when(
       jury_group == "male" & !female ~ TRUE,
       jury_group == "female" & female ~ TRUE,
-      TRUE ~ FALSE
+      .default ~ FALSE
     ),
     # Recode language
     language_german = case_when(
       language == "foreign" ~ FALSE,
       language == "foreign+" ~ FALSE,
-      TRUE ~ TRUE
+      .default ~ TRUE
     ),
     # nonfiction
     nonfiction = case_when(
       poetry == "Y" ~ TRUE,
       str_detect(tpcs, "Lyrik") ~ TRUE,
       str_detect(topics_orig, "Biografie|Autobiografie|Lyrik") ~ TRUE,
-      TRUE ~ FALSE
+      .default ~ FALSE
     ),
     metoo = ifelse(ynom < 2017, "Before #metoo", "After #metoo") |>
       as.factor() |> forcats::fct_relevel(rev),
