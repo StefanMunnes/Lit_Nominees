@@ -92,14 +92,7 @@ nominees <- nominees_pt |>
     TRUE ~ publisher
   )) |>
   left_join(publisher, by = "publisher") |>
-  rename(
-    pub_reputation = reputation,
-    pub_reputation_mean = mean_reputation
-  ) |>
-  mutate(pub_reputation = case_when(
-    is.na(pub_reputation) ~ FALSE,
-    TRUE ~ pub_reputation
-  )) |>
+  rename(pub_reputation_mean = mean_reputation) |>
   # 4. number of books before nomination (by list of DNB books)
   full_join(dnb_books, by = "url_name") |>
   group_by(url_name, prize, ynom) |>
@@ -142,7 +135,7 @@ nominees <- nominees_pt |>
     ybirth, ydeath, age_nom, female, language, academic, institute,
     revs_n, revs_fem, revs_n_nomis_st, senti_mean, senti_vari,
     books_dnb_n, books_dnb_prev, books_pt_n, starts_with("wv_"), wikiprizes_pre,
-    ypub, publisher, pub_place, starts_with("pub_rep"),
+    ypub, publisher, pub_place, pub_reputation_mean,
     starts_with("topic_"), topics_orig, tags, tpcs, keyword_dnb,
     shortlist_date, longlist_date, wv_interval,
     url_name, url_book, match_id, no_pt, no_senttop, poetry

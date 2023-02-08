@@ -3,16 +3,14 @@ nominees <- readRDS("../data/nominees.RDS")
 
 nominees_rec <- nominees |>
   mutate(
-    # revs N -> NA to 0
-    revs_n = ifelse(is.na(revs_n), 0, revs_n),
-    # wikiviews NA = 0
-    wv_mean = ifelse(is.na(wv_mean), 0, wv_mean),
-    # wv_mean = ifelse(wv_mean > 100, 100, wv_mean),
-    # create two dimensional variables from metric ones
+    # dichotome variables from metric ones: split by median; before NAs -> 0
     across(
-      c(revs_n, wv_mean, wikiprizes_pre, books_dnb_prev),
+      c(revs_n, wikiprizes_pre, books_dnb_prev, pub_reputation_mean, wv_mean),
+      ~ ifelse(is.na(.x), 0, .x)
+    ),
+    across(
+      c(revs_n, wikiprizes_pre, books_dnb_prev, pub_reputation_mean, wv_mean),
       ~ case_when(
-        is.na(.x) ~ "none",
         .x <= median(.x, na.rm = TRUE)
         ~ sprintf("<= median (%.1f)", median(.x, na.rm = TRUE)),
         .x > median(.x, na.rm = TRUE)
@@ -21,7 +19,6 @@ nominees_rec <- nominees |>
         as.factor(),
       .names = "{.col}_cat"
     ),
-    # across(senti_mean_cat:senti_vari_cat, relevel, "none"),
     # sentiment variation 0 if no variation but valid sentiment values
     senti_vari = ifelse(!is.na(senti_mean) & is.na(senti_vari), 0, senti_vari),
     senti_qual_cat = case_when(
