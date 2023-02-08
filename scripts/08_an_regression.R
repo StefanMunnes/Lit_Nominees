@@ -9,17 +9,15 @@ nominees_an <- readRDS("../data/nominees_rec.RDS") |>
 
 model_formulars <- c(
   "Quality" = winner ~ revs_n_cat + senti_qual_cat + debut,
-  # senti_mean_cat + senti_vari_cat
-  "Prominence" = winner ~ pub_reputation + books_dnb_prev_cat +
-    wikiprizes_pre_cat + nom_prize_prev + wv_mean_cat + debut,
+  "Prominence" = winner ~ books_dnb_prev_cat + wikiprizes_pre_cat +
+    nom_prize_prev + pub_reputation_mean_cat + wv_mean_cat + debut,
   "Topics" = winner ~ topic_history + topic_culture + topic_identity +
     topic_politics + topic_relations + debut,
   "Zeitgeist" = winner ~ female * metoo + language_german * syria + debut,
   "Jury" = winner ~ metoo * homophily + debut,
   "Full Model" = winner ~ revs_n_cat + senti_qual_cat +
-    # senti_mean_cat + senti_vari_cat +
-    books_dnb_prev_cat + wikiprizes_pre_cat + nom_prize_prev + wv_mean_cat +
-    pub_reputation +
+    books_dnb_prev_cat + wikiprizes_pre_cat + nom_prize_prev +
+    pub_reputation_mean_cat + wv_mean_cat +
     topic_history + topic_culture + topic_identity + topic_politics +
     topic_relations + female * metoo + language_german * syria +
     metoo * homophily + debut + nonfiction
@@ -32,12 +30,12 @@ models_lm <- lapply(model_formulars, function(m) {
 
 plot_groups <- list(
   c(
-    "Quality", "# Reviews (ref. median < 4.0)",
-    "Clearly high Quality (ref. low)"
+    "Quality", "# Reviews (ref. median <= 4.0)",
+    "Clearly high Quality (ref. clearly low)"
   ),
   c(
-    "Prominence", "# Previous Books (ref. median < 5.0)",
-    "Wikipedia Views (ref. median < 8.6)"
+    "Prominence", "# Previous Books (ref. median <= 5.0)",
+    "Wikipedia Views (ref. median <= 8.6)"
   ),
   c("Topics", "History", "Dummy: Nonfiction"),
   c("Zeitgeist/Jury", "Female", "Jury Homophily")
@@ -76,7 +74,8 @@ plot_lm <- models_lm[[6]] |>
       "wikiprizes_pre_cat> median (4.0)" =
         "# Previous Prizes (ref. median <= 4.0)",
       "nom_prize_prev" = "Previously nominated (ref. not)",
-      pub_reputation = "High Publisher Reputation (ref. low)",
+      "pub_reputation_mean_cat> median (4.4)" =
+        "High Publisher Reputation (ref. median <= 4.4)",
       "wv_mean_cat> median (8.6)" = "Wikipedia Views (ref. median <= 8.6)",
       topic_history = "History",
       topic_politics = "Politics",
