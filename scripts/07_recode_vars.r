@@ -1,4 +1,3 @@
-
 nominees <- readRDS("../data/nominees.RDS")
 
 nominees_rec <- nominees |>
@@ -46,49 +45,34 @@ nominees_rec <- nominees |>
     homophily = case_when(
       jury_group == "male" & !female ~ TRUE,
       jury_group == "female" & female ~ TRUE,
-      .default ~ FALSE
+      .default = FALSE
     ),
+    jury_preference = case_when(
+      jury_group == "even" ~ "even jury",
+      jury_group == "male" & !female ~ "male to male",
+      jury_group == "male" & female ~ "male to female",
+      jury_group == "female" & female ~ "female to female",
+      jury_group == "female" & !female ~ "female to male"
+    ) |>
+      as.factor(),
     # Recode language
     language_german = case_when(
       language == "foreign" ~ FALSE,
       language == "foreign+" ~ FALSE,
-      .default ~ TRUE
+      .default = TRUE
     ),
     # nonfiction
     nonfiction = case_when(
       poetry == "Y" ~ TRUE,
       str_detect(tpcs, "Lyrik") ~ TRUE,
       str_detect(topics_orig, "Biografie|Autobiografie|Lyrik") ~ TRUE,
-      .default ~ FALSE
+      .default = FALSE
     ),
+    # create Zeitgeist variables
     metoo = ifelse(ynom < 2017, "Before #metoo", "After #metoo") |>
       as.factor() |> forcats::fct_relevel(rev),
     syria = ifelse(ynom < 2015, "Before 2015", "After 2015") |>
       as.factor() |> forcats::fct_relevel(rev),
-    # # reviewers gender share as groups
-    # revs_group = case_when(
-    #   revs_fem < 0.5 ~ "male",
-    #   revs_fem == 0.5 ~ "even",
-    #   revs_fem > 0.5 ~ "female"
-    # ) |> factor(level = c("male", "even", "female")),
-    # prevprize = case_when(
-    #   wikiprizes_pre == 0 ~ "none",
-    #   wikiprizes_pre > 0 & wikiprizes_pre < 8 ~ "medium",
-    #   wikiprizes_pre >= 8 ~ "many"
-    # ) |> factor(level = c("none", "medium", "many")),
-    # # prevbooks as groups
-    # prevbooks = case_when(
-    #   books_dnb_prev == 0 ~ "none",
-    #   books_dnb_prev > 0 & books_dnb_prev < 11 ~ "medium",
-    #   books_dnb_prev > 10 ~ "many"
-    # ) |> factor(level = c("none", "medium", "many")),
-    # # age as groups
-    # age_group = case_when(
-    #   age_nom < 43 ~ "18-42",
-    #   between(age_nom, 43, 66) ~ "43-66",
-    #   age_nom > 66 ~ "67-92"
-    # ) |> factor(level = c("18-42", "43-66", "67-92")),
-    # create Zeitgeist variables
   )
 
 
