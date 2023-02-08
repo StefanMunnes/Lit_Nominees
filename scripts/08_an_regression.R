@@ -61,16 +61,23 @@ plot_lm <- models_lm[[6]] |>
   ) |>
   relabel_predictors(
     c(
-      "revs_n_cat> median (4.0)" = "# Reviews (ref. median < 4.0)",
-      "senti_qual_catnone" = "No review available (ref. low)",
-      "senti_qual_catdisputed low" = "Disputed low Quality (ref. low)",
-      "senti_qual_catdisputed high" = "Disputed high Quality (ref. low)",
-      "senti_qual_catclearly high" = "Clearly high Quality (ref. low)",
-      "books_dnb_prev_cat> median (5.0)" = "# Previous Books (ref. median < 5.0)",
-      "wikiprizes_pre_cat> median (4.0)" = "# Previous Prizes (ref. median < 4.0)",
+      "revs_n_cat> median (4.0)" =
+        "# Reviews (ref. median <= 4.0)",
+      "senti_qual_catnone" =
+        "No review available (ref. clearly low)",
+      "senti_qual_catdisputed low" =
+        "Disputed low Quality (ref. clearly low)",
+      "senti_qual_catdisputed high" =
+        "Disputed high Quality (ref. clearly low)",
+      "senti_qual_catclearly high" =
+        "Clearly high Quality (ref. clearly low)",
+      "books_dnb_prev_cat> median (5.0)" =
+        "# Previous Books (ref. median <= 5.0)",
+      "wikiprizes_pre_cat> median (4.0)" =
+        "# Previous Prizes (ref. median <= 4.0)",
       "nom_prize_prev" = "Previously nominated (ref. not)",
       pub_reputation = "High Publisher Reputation (ref. low)",
-      "wv_mean_cat> median (8.6)" = "Wikipedia Views (ref. median < 8.6)",
+      "wv_mean_cat> median (8.6)" = "Wikipedia Views (ref. median <= 8.6)",
       topic_history = "History",
       topic_politics = "Politics",
       topic_relations = "Relations",
@@ -161,8 +168,8 @@ predicts_2_df <- function(vars,
 
 
 
-predicts_2_df(c("homophily", "metoo")) |>
-  ggplot(aes(x = metoo, y = Prediction, color = as.factor(homophily))) +
+predicts_2_df(c("language_german", "syria")) |>
+  ggplot(aes(x = syria, y = Prediction, color = as.factor(language_german))) +
   geom_pointrange(
     aes(ymin = lower, ymax = upper),
     position = position_dodge(.2)
