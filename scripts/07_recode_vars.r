@@ -40,7 +40,9 @@ nominees_rec <- nominees |>
       jury_fem < 0.5 ~ "male",
       jury_fem == 0.5 ~ "even",
       jury_fem > 0.5 ~ "female"
-    ) |> factor(level = c("male", "even", "female")),
+    ) |>
+      factor(level = c("male", "even", "female")) |>
+      relevel(ref = "even"),
     # gen homophily variable
     homophily = case_when(
       jury_group == "male" & !female ~ TRUE,
@@ -49,18 +51,14 @@ nominees_rec <- nominees |>
     ),
     jury_preference = case_when(
       jury_group == "even" ~ "even jury",
-      jury_group == "male" & !female ~ "male to male",
-      jury_group == "male" & female ~ "male to female",
-      jury_group == "female" & female ~ "female to female",
-      jury_group == "female" & !female ~ "female to male"
+      jury_group == "male" & !female ~ "jury to male",
+      jury_group == "male" & female ~ "jury to female",
+      jury_group == "female" & female ~ "jury to female",
+      jury_group == "female" & !female ~ "jury to male"
     ) |>
       as.factor(),
     # Recode language
-    language_german = case_when(
-      language == "foreign" ~ FALSE,
-      language == "foreign+" ~ FALSE,
-      .default = TRUE
-    ),
+    language_german = ifelse(str_detect(language, "foreign"), FALSE, TRUE),
     # nonfiction
     nonfiction = case_when(
       poetry == "Y" ~ TRUE,
