@@ -21,49 +21,33 @@ nominees_rec <- nominees |>
     # sentiment variation 0 if no variation but valid sentiment values
     senti_vari = ifelse(!is.na(senti_mean) & is.na(senti_vari), 0, senti_vari),
     senti_qual_cat = case_when(
-      is.na(senti_mean) ~ 0,
+      is.na(senti_mean) ~ "none",
       senti_mean <= mean(senti_mean, na.rm = TRUE) &
-        senti_vari <= mean(senti_vari, na.rm = TRUE) ~ 1,
+        senti_vari <= mean(senti_vari, na.rm = TRUE) ~ "clearly low",
       senti_mean <= mean(senti_mean, na.rm = TRUE) &
-        senti_vari > mean(senti_vari, na.rm = TRUE) ~ 2,
+        senti_vari > mean(senti_vari, na.rm = TRUE) ~ "disputed low",
       senti_mean > mean(senti_mean, na.rm = TRUE) &
-        senti_vari > mean(senti_vari, na.rm = TRUE) ~ 3,
+        senti_vari > mean(senti_vari, na.rm = TRUE) ~ "disputed high",
       senti_mean > mean(senti_mean, na.rm = TRUE) &
-        senti_vari <= mean(senti_vari, na.rm = TRUE) ~ 4
+        senti_vari <= mean(senti_vari, na.rm = TRUE) ~ "clearly high"
     ) |>
-      factor(labels = c(
-        "none", "clearly low", "disputed low", "disputed high", "clearly high"
-      )) |>
+      as.factor() |>
       relevel(ref = "clearly low"),
     # jury gender share as groups
     jury_group = case_when(
-      jury_fem < 0.5 ~ "male",
+      jury_fem < 0.5 ~ "more male",
       jury_fem == 0.5 ~ "even",
-      jury_fem > 0.5 ~ "female"
+      jury_fem > 0.5 ~ "more female"
     ) |>
-      factor(level = c("male", "even", "female")) |>
+      as.factor() |>
       relevel(ref = "even"),
-    # gen homophily variable
-    homophily = case_when(
-      jury_group == "male" & !female ~ TRUE,
-      jury_group == "female" & female ~ TRUE,
-      .default = FALSE
-    ),
-    jury_preference = case_when(
-      jury_group == "even" ~ "even jury",
-      jury_group == "male" & !female ~ "jury to male",
-      jury_group == "male" & female ~ "jury to female",
-      jury_group == "female" & female ~ "jury to female",
-      jury_group == "female" & !female ~ "jury to male"
-    ) |>
-      as.factor(),
     # Recode language
     language_german = ifelse(str_detect(language, "foreign"), FALSE, TRUE),
     # nonfiction
     nonfiction = case_when(
       poetry == "Y" ~ TRUE,
       str_detect(tpcs, "Lyrik") ~ TRUE,
-      str_detect(topics_orig, "Biografie|Autobiografie|Lyrik") ~ TRUE,
+      str_detect(topics_orig, "[Bb]iografie|Lyrik") ~ TRUE,
       .default = FALSE
     ),
     # create Zeitgeist variables
@@ -71,6 +55,20 @@ nominees_rec <- nominees |>
       as.factor() |> forcats::fct_relevel(rev),
     syria = ifelse(ynom < 2015, "Before 2015", "After 2015") |>
       as.factor() |> forcats::fct_relevel(rev),
+    # gen homophily variable
+    # homophily = case_when(
+    #   jury_group == "male" & !female ~ TRUE,
+    #   jury_group == "female" & female ~ TRUE,
+    #   .default = FALSE
+    # ),
+    # jury_preference = case_when(
+    #   jury_group == "even" ~ "even jury",
+    #   jury_group == "male" & !female ~ "jury to male",
+    #   jury_group == "male" & female ~ "jury to female",
+    #   jury_group == "female" & female ~ "jury to female",
+    #   jury_group == "female" & !female ~ "jury to male"
+    # ) |>
+    #   as.factor(),
   )
 
 
