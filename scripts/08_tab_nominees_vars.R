@@ -16,7 +16,7 @@ varlist <- winner_all ~ winner + revs_n_cat + senti_qual_cat +
   pub_reputation_mean_cat + wv_mean_cat +
   topic_history + topic_politics + topic_relations + topic_identity +
   topic_culture + nonfiction +
-  female + jury_preference + language_german + debut
+  female + jury_group + language_german + debut # jury_preference
 
 
 tableby(varlist, data = noms_all, total = FALSE, cat.simplify = TRUE) |>
@@ -48,7 +48,7 @@ tableby(varlist, data = noms_all, total = FALSE, cat.simplify = TRUE) |>
       topic_culture = "Topic: Culture",
       nonfiction = "Nonfiction",
       female = "Female",
-      jury_preference = "Jury Preference",
+      jury_group = "Jury Composition",
       language_german = "German Background",
       debut = "Debut"
     )
