@@ -11,14 +11,14 @@ modelsummary(models_log,
   stars = c("*" = .05, "**" = .01, "***" = 0.001),
   coef_map = coef_labs,
   gof_map = "nobs", # only display N
-  estimate = "{estimate}{stars} ({std.error})",
+  estimate = "{estimate} ({std.error}) {stars}",
   statistic = NULL,
   shape = term ~ model,
   notes = list(
     "* = .05, ** = .01, *** = 0.001",
     "Standard errors in parentheses. All models include control for debut prize"
   ),
-  title = "Linear Probability Model",
+  title = "Logistic Probability Model",
   output = "flextable"
 ) |>
   # width(j = 2:7, width = 1) |>
@@ -27,6 +27,6 @@ modelsummary(models_log,
   fontsize(size = 9, part = "all") |>
   padding(padding = 0, part = "all") |>
   save_as_docx(
-    path = "../output/tables/table_log.docx",
+    path = "../output/tables/tab_models_log.docx",
     pr_section = sect_properties
   )
