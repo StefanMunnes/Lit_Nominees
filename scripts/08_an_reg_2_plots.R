@@ -9,8 +9,8 @@ plot_groups <- list(
     "Prominence", "# Previous Books (ref. median <= 5.0)",
     "Wikipedia Views (ref. median <= 8.6)"
   ),
-  c("Topics", "History", "Dummy: Nonfiction"),
-  c("Zeitgeist/Jury", "Female", "German background")
+  c("Demogr.", "Female", "German background"),
+  c("Topics", "History", "Dummy: Nonfiction")
 )
 
 
@@ -20,7 +20,7 @@ plot_log <- summary(margins_log) |>
     estimate = AME,
     std.error = SE
   ) |>
-  filter(!str_detect(term, "After"), term != "debut") |>
+  filter(!str_detect(term, "After|jury"), term != "debut") |>
   dwplot(
     vline = geom_vline(
       xintercept = 0,
@@ -53,10 +53,12 @@ ggsave(
   plot = plot_log, dpi = 500, scale = 1.15, height = 8, width = 15
 )
 
+
 # ---- 2. interaction effects ----
 
 predicts_2_df <- function(vars,
-                          mod = models_log[[6]], vcov_mat = cl_vcov_mat) {
+                          mod = models_log$"Full Model",
+                          vcov_mat = cl_vcov_mat) {
   at_list <- list(
     unique(nominees_an[vars[1]]) |> dplyr::pull(),
     unique(nominees_an[vars[2]]) |> dplyr::pull()
@@ -112,7 +114,22 @@ plot1 <- predicts_2_df(c("female", "metoo")) |>
 
 
 #
-plot2 <- predicts_2_df(c("female", "jury_group")) |>
+plot2 <- predicts_2_df(c("language_german", "syria")) |>
+  ggplot(aes(
+    x = syria, y = Prediction,
+    color = factor(language_german, labels = c("Non-German", "German"))
+  )) +
+  plot_opts +
+  scale_color_manual(values = c("#7570b3", "#e7298a")) +
+  ggtitle("German background x Migration") +
+  theme(
+    axis.text.y = element_blank(),
+    axis.title.y = element_blank(),
+    axis.ticks.y = element_blank()
+  )
+
+#
+plot3 <- predicts_2_df(c("female", "jury_group")) |>
   mutate(jury_group = forcats::fct_relevel(
     jury_group, "more male", "even", "more female"
   )) |>
@@ -129,21 +146,6 @@ plot2 <- predicts_2_df(c("female", "jury_group")) |>
     axis.ticks.y = element_blank()
   )
 
-
-#
-plot3 <- predicts_2_df(c("language_german", "syria")) |>
-  ggplot(aes(
-    x = syria, y = Prediction,
-    color = factor(language_german, labels = c("Non-German", "German"))
-  )) +
-  plot_opts +
-  scale_color_manual(values = c("#7570b3", "#e7298a")) +
-  ggtitle("German background x Migration") +
-  theme(
-    axis.text.y = element_blank(),
-    axis.title.y = element_blank(),
-    axis.ticks.y = element_blank()
-  )
 
 p_load("ggpubr")
 
