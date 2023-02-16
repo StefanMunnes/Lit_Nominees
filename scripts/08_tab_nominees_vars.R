@@ -5,10 +5,6 @@ p_load("arsenal")
 noms_all <- readRDS("../data/nominees_rec.RDS") |>
   mutate(winner_all = "All Nominations")
 
-# add cut-offs to label
-# levels(noms_all$prevbooks) <- c("none", "medium (1-10)", "many (>10)")
-# levels(noms_all$prevprize) <- c("none", "medium (1-7)", "many (>7)")
-
 
 # prep varlist and table options
 varlist <- winner_all ~ winner + revs_n_cat + senti_qual_cat +
@@ -16,7 +12,7 @@ varlist <- winner_all ~ winner + revs_n_cat + senti_qual_cat +
   pub_reputation_mean_cat + wv_mean_cat +
   topic_history + topic_politics + topic_relations + topic_identity +
   topic_culture + nonfiction +
-  female + jury_group + language_german + debut # jury_preference
+  female + age_nom_cat + language_german + jury_group + debut
 
 
 tableby(varlist, data = noms_all, total = FALSE, cat.simplify = TRUE) |>
@@ -48,8 +44,9 @@ tableby(varlist, data = noms_all, total = FALSE, cat.simplify = TRUE) |>
       topic_culture = "Topic: Culture",
       nonfiction = "Nonfiction",
       female = "Female",
-      jury_group = "Jury Composition",
+      age_nom_cat = sprintf("Higher age %s", levels(noms_all$age_nom_cat)[2]),
       language_german = "German Background",
+      jury_group = "Jury Composition",
       debut = "Debut"
     )
   ) |>
