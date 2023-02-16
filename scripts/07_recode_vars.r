@@ -8,7 +8,10 @@ nominees_rec <- nominees |>
       ~ ifelse(is.na(.x), 0, .x)
     ),
     across(
-      c(revs_n, wikiprizes_pre, books_dnb_prev, pub_reputation_mean, wv_mean),
+      c(
+        revs_n, wikiprizes_pre, books_dnb_prev, pub_reputation_mean, wv_mean,
+        age_nom
+      ),
       ~ case_when(
         .x <= median(.x, na.rm = TRUE)
         ~ sprintf("<= median (%.1f)", median(.x, na.rm = TRUE)),
@@ -33,6 +36,20 @@ nominees_rec <- nominees |>
     ) |>
       as.factor() |>
       relevel(ref = "clearly low"),
+    # nonfiction
+    nonfiction = case_when(
+      poetry == "Y" ~ TRUE,
+      str_detect(tpcs, "Lyrik") ~ TRUE,
+      str_detect(topics_orig, "[Bb]iografie|Lyrik") ~ TRUE,
+      .default = FALSE
+    ),
+    # Recode language
+    language_german = ifelse(str_detect(language, "foreign"), FALSE, TRUE),
+    # create Zeitgeist variables
+    metoo = ifelse(ynom < 2017, "Before #metoo", "After #metoo") |>
+      as.factor() |> forcats::fct_relevel(rev),
+    syria = ifelse(ynom < 2015, "Before 2015", "After 2015") |>
+      as.factor() |> forcats::fct_relevel(rev),
     # jury gender share as groups
     jury_group = case_when(
       jury_fem < 0.5 ~ "more male",
@@ -41,34 +58,6 @@ nominees_rec <- nominees |>
     ) |>
       as.factor() |>
       relevel(ref = "even"),
-    # Recode language
-    language_german = ifelse(str_detect(language, "foreign"), FALSE, TRUE),
-    # nonfiction
-    nonfiction = case_when(
-      poetry == "Y" ~ TRUE,
-      str_detect(tpcs, "Lyrik") ~ TRUE,
-      str_detect(topics_orig, "[Bb]iografie|Lyrik") ~ TRUE,
-      .default = FALSE
-    ),
-    # create Zeitgeist variables
-    metoo = ifelse(ynom < 2017, "Before #metoo", "After #metoo") |>
-      as.factor() |> forcats::fct_relevel(rev),
-    syria = ifelse(ynom < 2015, "Before 2015", "After 2015") |>
-      as.factor() |> forcats::fct_relevel(rev),
-    # gen homophily variable
-    # homophily = case_when(
-    #   jury_group == "male" & !female ~ TRUE,
-    #   jury_group == "female" & female ~ TRUE,
-    #   .default = FALSE
-    # ),
-    # jury_preference = case_when(
-    #   jury_group == "even" ~ "even jury",
-    #   jury_group == "male" & !female ~ "jury to male",
-    #   jury_group == "male" & female ~ "jury to female",
-    #   jury_group == "female" & female ~ "jury to female",
-    #   jury_group == "female" & !female ~ "jury to male"
-    # ) |>
-    #   as.factor(),
   )
 
 
