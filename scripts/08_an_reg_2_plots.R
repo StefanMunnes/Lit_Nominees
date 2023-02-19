@@ -45,7 +45,7 @@ plot_log <- summary(margins_log) |>
 
 plot_log <- plot_log |>
   add_brackets(plot_groups, fontSize = 1.3)
-
+  
 plot_log
 
 ggsave(

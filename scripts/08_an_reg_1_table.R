@@ -6,7 +6,7 @@ sect_properties <- prop_section(
   type = "continuous"
 )
 
-modelsummary(models_log,
+modelsummary(models_log[c(1, 2, 3, 7, 8)],
   vcov = ~prize, # clustered SE's
   stars = c("*" = .05, "**" = .01, "***" = 0.001),
   coef_map = coef_labs,
@@ -21,8 +21,6 @@ modelsummary(models_log,
   title = "Logistic Probability Model",
   output = "flextable"
 ) |>
-  # width(j = 2:7, width = 1) |>
-  # width(j = 1, width = 2.5) |>
   autofit() |>
   fontsize(size = 9, part = "all") |>
   padding(padding = 0, part = "all") |>

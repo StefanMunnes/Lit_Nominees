@@ -27,21 +27,22 @@ coef_labs <- c(
   "pub_reputation_mean_cat> median (4.4)" =
     "High Publisher Reputation (ref. median <= 4.4)",
   "wv_mean_cat> median (8.6)" = "Wikipedia Views (ref. median <= 8.6)",
+  "female" = "Female",
+  "age_nom_cat> median (43.0)" = "Higher age (ref. median <= 43.0)",
+  "language_german" = "German background",
   "topic_history" = "History",
   "topic_politics" = "Politics",
   "topic_relations" = "Relations",
   "topic_identity" = "Identity",
   "topic_culture" = "Culture",
   "nonfiction" = "Dummy: Nonfiction",
-  "female" = "Female",
   "female:metooAfter #metoo" = "Female x After #metoo",
+  "language_german:syriaAfter 2015" = "German background x After 2015",
   "jury_groupmore female" = "Jury female dominated (ref. even)",
   "jury_groupmore male" = "Jury male dominated (ref. even)",
   "female:jury_groupmore female" = "Female x Jury female dominated (ref. even)",
-  "female:jury_groupmore male" = "Female x Jury male dominated (ref. even)",
-  "language_german" = "German background",
-  "syriaAfter 2015" = "After 2015",
-  "language_german:syriaAfter 2015" = "German background x After 2015"
+  "female:jury_groupmore male" = "Female x Jury male dominated (ref. even)"
+  # "syriaAfter 2015" = "After 2015",
 )
 
 
@@ -49,16 +50,22 @@ model_formulars <- c(
   "Quality" = winner ~ revs_n_cat + senti_qual_cat + debut,
   "Prominence" = winner ~ books_dnb_prev_cat + wikiprizes_pre_cat +
     nom_prize_prev + pub_reputation_mean_cat + wv_mean_cat + debut,
+  "Demographics" = winner ~ female + age_nom_cat + language_german + debut,
   "Topics" = winner ~ topic_history + topic_culture + topic_identity +
-    topic_politics + topic_relations + debut,
+    topic_politics + topic_relations + nonfiction + debut,
   "Zeitgeist" = winner ~ female * metoo + language_german * syria + debut,
   "Jury" = winner ~ female * jury_group + debut,
+  "Topics/Zeitgeist/Jury" = winner ~ topic_history + topic_culture +
+    topic_identity + topic_politics + topic_relations + nonfiction +
+    female * metoo + language_german * syria +
+    female * jury_group + debut,
   "Full Model" = winner ~ revs_n_cat + senti_qual_cat +
     books_dnb_prev_cat + wikiprizes_pre_cat + nom_prize_prev +
     pub_reputation_mean_cat + wv_mean_cat +
     topic_history + topic_culture + topic_identity + topic_politics +
-    topic_relations + female * metoo + language_german * syria +
-    female * jury_group + debut + nonfiction
+    topic_relations + nonfiction +
+    female * metoo + age_nom_cat + language_german * syria +
+    female * jury_group + debut
 )
 
 
@@ -67,6 +74,10 @@ models_log <- lapply(model_formulars, function(m) {
 })
 
 
-cl_vcov_mat <- vcovCL(models_log[[6]], cluster = ~prize)
+cl_vcov_mat <- vcovCL(models_log$"Full Model",
+  cluster = ~prize
+)
 
-margins_log <- margins(models_log[[6]], vcov = cl_vcov_mat)
+margins_log <- margins(models_log$"Full Model",
+  vcov = cl_vcov_mat
+)
