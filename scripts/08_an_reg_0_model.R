@@ -1,7 +1,4 @@
-pacman::p_load("lmtest", "sandwich", "margins", "broom", "dotwhisker")
-
-pacman::p_load("ggeffects", "parameters")
-pacman::p_load("modelsummary", "flextable", "officer")
+pacman::p_load("sandwich", "margins")
 
 
 nominees_an <- readRDS("../data/nominees_rec.RDS") |>

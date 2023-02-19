@@ -1,3 +1,5 @@
+pacman::p_load("dotwhisker", "ggpubr")
+
 # ---- 1. coefplot with Average Marginal Effects ----
 
 plot_groups <- list(
@@ -45,7 +47,7 @@ plot_log <- summary(margins_log) |>
 
 plot_log <- plot_log |>
   add_brackets(plot_groups, fontSize = 1.3)
-  
+
 plot_log
 
 ggsave(
@@ -88,12 +90,12 @@ plot_opts <- list(
     position = position_dodge(.2)
   ),
   geom_hline(yintercept = 0, alpha = 0.5),
-  scale_y_continuous(breaks = seq(-0.0, 0.5, 0.1), limits = c(-0.05, 0.55)),
+  scale_y_continuous(breaks = seq(-0.1, 0.5, 0.1), limits = c(-0.1, 0.55)),
   xlab(""),
   theme_bw(base_size = 20),
   theme(
     legend.title = element_blank(),
-    legend.justification = c(1.2, 1.3),
+    legend.justification = c(1.1, 1.25),
     legend.position = c(1, 1),
     legend.background = element_blank(),
     plot.title = element_text(size = 20),
@@ -102,7 +104,7 @@ plot_opts <- list(
 )
 
 
-#
+# Plot1: Female x #metoo
 plot1 <- predicts_2_df(c("female", "metoo")) |>
   ggplot(aes(
     x = metoo, y = Prediction,
@@ -113,7 +115,7 @@ plot1 <- predicts_2_df(c("female", "metoo")) |>
   ggtitle("Female x #metoo")
 
 
-#
+# Plot2: German background x Migration
 plot2 <- predicts_2_df(c("language_german", "syria")) |>
   ggplot(aes(
     x = syria, y = Prediction,
@@ -128,7 +130,7 @@ plot2 <- predicts_2_df(c("language_german", "syria")) |>
     axis.ticks.y = element_blank()
   )
 
-#
+# Plot3: Female x Jury Composition
 plot3 <- predicts_2_df(c("female", "jury_group")) |>
   mutate(jury_group = forcats::fct_relevel(
     jury_group, "more male", "even", "more female"
@@ -147,12 +149,7 @@ plot3 <- predicts_2_df(c("female", "jury_group")) |>
   )
 
 
-p_load("ggpubr")
-
-plots_interactions <- ggarrange(plot1, plot2, plot3,
-  nrow = 1
-)
-
+plots_interactions <- ggarrange(plot1, plot2, plot3, nrow = 1)
 
 ggsave(
   file = "../output/graphs/interactions_log_predictions.png",

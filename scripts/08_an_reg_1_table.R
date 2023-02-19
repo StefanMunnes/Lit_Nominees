@@ -1,3 +1,5 @@
+pacman::p_load("modelsummary", "flextable", "officer")
+
 sect_properties <- prop_section(
   page_size = page_size(
     orient = "landscape",
