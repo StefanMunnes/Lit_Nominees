@@ -4,17 +4,16 @@ pacman::p_load("dotwhisker", "ggpubr")
 
 plot_groups <- list(
   c(
-    "Quality", "# Reviews (ref. median <= 4.0)",
-    "Clearly high Quality (ref. clearly low)"
+    "Quality", "# reviews (ref. median <= 4.0)",
+    "Clearly high quality"
   ),
   c(
-    "Prominence", "# Previous Books (ref. median <= 5.0)",
-    "Wikipedia Views (ref. median <= 8.6)"
+    "Prominence", "# previous books (ref. median <= 5.0)",
+    "Wikipedia views (ref. median <= 8.6)"
   ),
   c("Demogr.", "Female", "German background"),
-  c("Topics", "History", "Dummy: Nonfiction")
+  c("Zeitgeist", "History", "Culture")
 )
-
 
 plot_log <- summary(margins_log) |>
   rename(
@@ -22,7 +21,9 @@ plot_log <- summary(margins_log) |>
     estimate = AME,
     std.error = SE
   ) |>
-  filter(!str_detect(term, "After|jury"), term != "debut") |>
+  filter(!str_detect(term, "After|jury"),
+    term != "debut",
+    term != "nonfiction") |>
   dwplot(
     vline = geom_vline(
       xintercept = 0,
@@ -42,13 +43,21 @@ plot_log <- summary(margins_log) |>
   theme(
     plot.title = element_text(face = "bold"),
     legend.position = "none"
+    # Uncomment for transparency 
+    # panel.background = element_rect(fill = "transparent", colour = NA), 
+    # legend.background = element_rect(fill='transparent'),
+    # legend.box.background = element_rect(fill='transparent'), 
+    # plot.background = element_rect(fill = "transparent", colour = NA)
   )
 
+# ggsave(
+#   file = "../output/graphs/coefplot_log_short_transparent.png",
+#   plot = plot_log, dpi = 500, scale = 1.15, height = 8, width = 15,
+#   bg = "transparent"
+# ) 
 
 plot_log <- plot_log |>
-  add_brackets(plot_groups, fontSize = 1.3)
-
-plot_log
+  add_brackets(plot_groups, fontSize = 1.3) 
 
 ggsave(
   file = "../output/graphs/coefplot_log_short.png",
@@ -99,7 +108,12 @@ plot_opts <- list(
     legend.position = c(1, 1),
     legend.background = element_blank(),
     plot.title = element_text(size = 20),
-    panel.grid.major.x = element_blank()
+    panel.grid.major.x = element_blank() 
+    # legend.background = element_rect(fill='transparent'),
+    # legend.key = element_blank(),
+    # panel.background = element_rect(fill = "transparent", colour = NA), 
+    # legend.box.background = element_rect(fill='transparent'), 
+    # plot.background = element_rect(fill = "transparent", colour = NA)
   )
 )
 
@@ -149,7 +163,7 @@ plot3 <- predicts_2_df(c("female", "jury_group")) |>
   )
 
 
-plots_interactions <- ggarrange(plot1, plot2, plot3, nrow = 1)
+plots_interactions <- ggarrange(plot1, plot2, plot3, nrow = 1) 
 
 ggsave(
   file = "../output/graphs/interactions_log_predictions.png",

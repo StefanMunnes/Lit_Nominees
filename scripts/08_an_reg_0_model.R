@@ -7,23 +7,23 @@ nominees_an <- readRDS("../data/nominees_rec.RDS") |>
 
 coef_labs <- c(
   "revs_n_cat> median (4.0)" =
-    "# Reviews (ref. median <= 4.0)",
+    "# reviews (ref. median <= 4.0)",
   "senti_qual_catnone" =
     "No review available (ref. clearly low)",
   "senti_qual_catdisputed low" =
-    "Disputed low Quality (ref. clearly low)",
+    "Disputed low quality",
   "senti_qual_catdisputed high" =
-    "Disputed high Quality (ref. clearly low)",
+    "Disputed high quality ",
   "senti_qual_catclearly high" =
-    "Clearly high Quality (ref. clearly low)",
+    "Clearly high quality",
   "books_dnb_prev_cat> median (5.0)" =
-    "# Previous Books (ref. median <= 5.0)",
+    "# previous books (ref. median <= 5.0)",
   "wikiprizes_pre_cat> median (4.0)" =
-    "# Previous Prizes (ref. median <= 4.0)",
+    "# previous prizes (ref. median <= 4.0)",
   "nom_prize_prev" = "Previously nominated (ref. not)",
   "pub_reputation_mean_cat> median (4.4)" =
-    "High Publisher Reputation (ref. median <= 4.4)",
-  "wv_mean_cat> median (8.6)" = "Wikipedia Views (ref. median <= 8.6)",
+    "High publisher reputation (ref. median <= 4.4)",
+  "wv_mean_cat> median (8.6)" = "Wikipedia views (ref. median <= 8.6)",
   "female" = "Female",
   "age_nom_cat> median (43.0)" = "Higher age (ref. median <= 43.0)",
   "language_german" = "German background",
@@ -32,14 +32,15 @@ coef_labs <- c(
   "topic_relations" = "Relations",
   "topic_identity" = "Identity",
   "topic_culture" = "Culture",
-  "nonfiction" = "Dummy: Nonfiction",
-  "female:metooAfter #metoo" = "Female x After #metoo",
-  "language_german:syriaAfter 2015" = "German background x After 2015",
+  "female:metooAfter #metoo" = "Female x after #metoo",
+  "language_german:syriaAfter 2015" = "German background x after 2015",
+  "syriaAfter 2015" = "After 2015",
+  "metooAfter #metoo" = "After #metoo",
   "jury_groupmore female" = "Jury female dominated (ref. even)",
   "jury_groupmore male" = "Jury male dominated (ref. even)",
-  "female:jury_groupmore female" = "Female x Jury female dominated (ref. even)",
-  "female:jury_groupmore male" = "Female x Jury male dominated (ref. even)"
-  # "syriaAfter 2015" = "After 2015",
+  "female:jury_groupmore female" = "Female x jury female dominated (ref. even)",
+  "female:jury_groupmore male" = "Female x jury male dominated (ref. even)",
+  "nonfiction" = "Nonfiction"
 )
 
 
