@@ -1,68 +1,73 @@
 pacman::p_load("dotwhisker", "ggpubr")
 
+
 # ---- 1. coefplot with Average Marginal Effects ----
 
 plot_groups <- list(
-  c(
-    "Quality", "# reviews (ref. median <= 4.0)",
-    "Clearly high quality"
-  ),
+  c("Demogr.", "Female", "German background"),
   c(
     "Prominence", "# previous books (ref. median <= 5.0)",
     "Wikipedia views (ref. median <= 8.6)"
   ),
-  c("Demogr.", "Female", "German background"),
-  c("Zeitgeist", "History", "Culture")
+  c("Zeitgeist", "History", "Culture"),
+  c(
+    "Quality", "# reviews (ref. median <= 4.0)",
+    "Clearly high quality"
+  )
 )
 
-plot_log <- summary(margins_log) |>
+
+plot_log <- lapply(margins_log, summary) |>
+  bind_rows(.id = "model") |>
   rename(
     term = factor,
     estimate = AME,
     std.error = SE
   ) |>
-  filter(!str_detect(term, "After|jury"),
+  filter(
+    !str_detect(term, "After|jury"),
     term != "debut",
-    term != "nonfiction") |>
+    term != "nonfiction"
+  ) |>
+  relabel_predictors(coef_labs) |>
+  mutate(
+    term = as.character(term),
+    model = case_when(
+      model == "M1" ~ "Demographics",
+      model == "M2" ~ "+ Prominence",
+      model == "M3" ~ "+ Zeitgeist",
+      model == "M4" ~ "+ Quality"
+    )
+  ) |>
   dwplot(
     vline = geom_vline(
       xintercept = 0,
       colour = "grey60",
       linetype = 2
     ),
-    dodge_size = 0.4,
+    dodge_size = 0.7,
     style = c("dotwhisker"),
-    dot_args = list(size = 5),
-    whisker_args = list(size = 1),
-    line_args = list(alpha = 0.75, size = 2)
-  ) |>
-  relabel_predictors(coef_labs) +
+    dot_args = list(size = 3),
+    whisker_args = list(size = 0.75),
+    line_args = list(alpha = 0.75, size = 12)
+  ) +
   theme_bw(base_size = 20) +
   xlab("Average Marginal Effects") + ylab("") +
   ggtitle("Predicting Winners") +
   theme(
-    plot.title = element_text(face = "bold"),
-    legend.position = "none"
-    # Uncomment for transparency 
-    # panel.background = element_rect(fill = "transparent", colour = NA), 
-    # legend.background = element_rect(fill='transparent'),
-    # legend.box.background = element_rect(fill='transparent'), 
-    # plot.background = element_rect(fill = "transparent", colour = NA)
+    plot.title = element_text(face = "bold")
   )
 
-# ggsave(
-#   file = "../output/graphs/coefplot_log_short_transparent.png",
-#   plot = plot_log, dpi = 500, scale = 1.15, height = 8, width = 15,
-#   bg = "transparent"
-# ) 
-
 plot_log <- plot_log |>
-  add_brackets(plot_groups, fontSize = 1.3) 
+  add_brackets(plot_groups, fontSize = 1.3)
+
+plot_log
 
 ggsave(
-  file = "../output/graphs/coefplot_log_short.png",
-  plot = plot_log, dpi = 500, scale = 1.15, height = 8, width = 15
+  file = "../output/graphs/coefplot_log_short_multimodel.png",
+  plot = plot_log, dpi = 500, scale = 1.15, height = 9, width = 15
 )
+
 
 
 # ---- 2. interaction effects ----
@@ -108,11 +113,11 @@ plot_opts <- list(
     legend.position = c(1, 1),
     legend.background = element_blank(),
     plot.title = element_text(size = 20),
-    panel.grid.major.x = element_blank() 
+    panel.grid.major.x = element_blank()
     # legend.background = element_rect(fill='transparent'),
     # legend.key = element_blank(),
-    # panel.background = element_rect(fill = "transparent", colour = NA), 
-    # legend.box.background = element_rect(fill='transparent'), 
+    # panel.background = element_rect(fill = "transparent", colour = NA),
+    # legend.box.background = element_rect(fill='transparent'),
     # plot.background = element_rect(fill = "transparent", colour = NA)
   )
 )
@@ -163,7 +168,7 @@ plot3 <- predicts_2_df(c("female", "jury_group")) |>
   )
 
 
-plots_interactions <- ggarrange(plot1, plot2, plot3, nrow = 1) 
+plots_interactions <- ggarrange(plot1, plot2, plot3, nrow = 1)
 
 ggsave(
   file = "../output/graphs/interactions_log_predictions.png",
