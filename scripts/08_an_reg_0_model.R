@@ -8,12 +8,12 @@ nominees_an <- readRDS("../data/nominees_rec.RDS") |>
 coef_labs <- c(
   "female" = "Female",
   "age_nom_cat> median (43.0)" = "Higher age (ref. median <= 43.0)",
-  "language_german" = "German background",
+  "language_nongerman" = "Non-German background",
   "books_dnb_prev_cat> median (5.0)" =
     "# previous books (ref. median <= 5.0)",
   "wikiprizes_pre_cat> median (4.0)" =
     "# previous prizes (ref. median <= 4.0)",
-  "nom_prize_prev" = "Previously nominated (ref. not)",
+  "nom_prize_prev" = "Previously unawarded nominated (ref. not)",
   "pub_reputation_mean_cat> median (4.4)" =
     "High publisher reputation (ref. median <= 4.4)",
   "wv_mean_cat> median (8.6)" = "Wikipedia views (ref. median <= 8.6)",
@@ -23,7 +23,7 @@ coef_labs <- c(
   "topic_identity" = "Identity",
   "topic_culture" = "Culture",
   # "female:metooAfter #metoo" = "Female x after #metoo",
-  # "language_german:syriaAfter 2015" = "German background x after 2015",
+  # "language_nongerman:syriaAfter 2015" = "German background x after 2015",
   # "syriaAfter 2015" = "After 2015",
   # "metooAfter #metoo" = "After #metoo",
   # "jury_groupmore female" = "Jury female dominated (ref. even)",
@@ -45,23 +45,23 @@ coef_labs <- c(
 
 
 model_formulars <- c(
-  "M1" = winner ~ female + age_nom_cat + language_german + debut,
-  "M2" = winner ~ female + age_nom_cat + language_german +
+  "M1" = winner ~ female + age_nom_cat + language_nongerman + debut,
+  "M2" = winner ~ female + age_nom_cat + language_nongerman +
     books_dnb_prev_cat + wikiprizes_pre_cat +
     nom_prize_prev + pub_reputation_mean_cat + wv_mean_cat + debut,
-  "M3" = winner ~ female + age_nom_cat + language_german +
+  "M3" = winner ~ female + age_nom_cat + language_nongerman +
     books_dnb_prev_cat + wikiprizes_pre_cat +
     nom_prize_prev + pub_reputation_mean_cat + wv_mean_cat +
     topic_history + topic_culture +
     topic_identity + topic_politics + topic_relations + nonfiction +
-    female * metoo + language_german * syria +
+    female * metoo + language_nongerman * syria +
     female * jury_group + debut,
-  "M4" = winner ~ female + age_nom_cat + language_german +
+  "M4" = winner ~ female + age_nom_cat + language_nongerman +
     books_dnb_prev_cat + wikiprizes_pre_cat +
     nom_prize_prev + pub_reputation_mean_cat + wv_mean_cat +
     topic_history + topic_culture +
     topic_identity + topic_politics + topic_relations + nonfiction +
-    female * metoo + language_german * syria +
+    female * metoo + language_nongerman * syria +
     female * jury_group +
     revs_n_cat + senti_qual_cat + debut
 )

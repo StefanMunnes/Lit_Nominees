@@ -4,7 +4,7 @@ pacman::p_load("dotwhisker", "ggpubr")
 # ---- 1. coefplot with Average Marginal Effects ----
 
 plot_groups <- list(
-  c("Demogr.", "Female", "German background"),
+  c("Demogr.", "Female", "Non-German background"),
   c(
     "Prominence", "# previous books (ref. median <= 5.0)",
     "Wikipedia views (ref. median <= 8.6)"
@@ -17,7 +17,7 @@ plot_groups <- list(
 )
 
 
-plot_log <- lapply(margins_log, summary) |>
+data_log <- lapply(margins_log, summary) |>
   bind_rows(.id = "model") |>
   rename(
     term = factor,
@@ -37,35 +37,46 @@ plot_log <- lapply(margins_log, summary) |>
       model == "M2" ~ "+ Prominence",
       model == "M3" ~ "+ Zeitgeist",
       model == "M4" ~ "+ Quality"
-    )
-  ) |>
+    ),
+    # confidence intervalls to zero
+    upper = estimate,
+    lower = estimate,
+    std.error = 0,
+    # shape = as.numeric(factor(Models))
+  )
+
+
+plot_log <- data_log |>
   dwplot(
     vline = geom_vline(
       xintercept = 0,
       colour = "grey60",
       linetype = 2
     ),
-    dodge_size = 0.7,
+    dodge_size = 0.9,
+    # model_name = "Models",
     style = c("dotwhisker"),
-    dot_args = list(size = 3),
+    dot_args = list(size = 3.5),
     whisker_args = list(size = 0.75),
     line_args = list(alpha = 0.75, size = 12)
   ) +
   theme_bw(base_size = 20) +
+  # guides(colour = guide_legend("Models")) +
   xlab("Average Marginal Effects") + ylab("") +
   ggtitle("Predicting Winners") +
   theme(
-    plot.title = element_text(face = "bold")
+    plot.title = element_text(face = "bold"),
+    plot.margin = margin(1, 1, 1, 1)
   )
 
 plot_log <- plot_log |>
   add_brackets(plot_groups, fontSize = 1.3)
 
-plot_log
+# plot_log
 
 ggsave(
   file = "../output/graphs/coefplot_log_short_multimodel.png",
-  plot = plot_log, dpi = 500, scale = 1.15, height = 9, width = 15
+  plot = plot_log, dpi = 600, scale = 1.15, height = 9, width = 15
 )
 
 

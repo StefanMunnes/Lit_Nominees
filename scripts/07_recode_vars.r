@@ -44,7 +44,7 @@ nominees_rec <- nominees |>
       .default = FALSE
     ),
     # Recode language
-    language_german = ifelse(str_detect(language, "foreign"), FALSE, TRUE),
+    language_nongerman = ifelse(str_detect(language, "foreign"), TRUE, FALSE),
     # create Zeitgeist variables
     metoo = ifelse(ynom < 2017, "Before #metoo", "After #metoo") |>
       as.factor() |> forcats::fct_relevel(rev),
