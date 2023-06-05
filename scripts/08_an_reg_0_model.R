@@ -8,7 +8,7 @@ nominees_an <- readRDS("../data/nominees_rec.RDS") |>
 coef_labs <- c(
   "female" = "Female",
   "age_nom_cat> median (43.0)" = "Higher age (ref. median <= 43.0)",
-  "language_nongerman" = "Non-German background",
+  "language_nongerman" = "Non-German native speaker",
   "books_dnb_prev_cat> median (5.0)" =
     "# previous books (ref. median <= 5.0)",
   "wikiprizes_pre_cat> median (4.0)" =
@@ -23,7 +23,7 @@ coef_labs <- c(
   "topic_identity" = "Identity",
   "topic_culture" = "Culture",
   # "female:metooAfter #metoo" = "Female x after #metoo",
-  # "language_nongerman:syriaAfter 2015" = "German background x after 2015",
+  # "language_nongerman:syriaAfter 2015" = "German native speaker x after 2015",
   # "syriaAfter 2015" = "After 2015",
   # "metooAfter #metoo" = "After #metoo",
   # "jury_groupmore female" = "Jury female dominated (ref. even)",

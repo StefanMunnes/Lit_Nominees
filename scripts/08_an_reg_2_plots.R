@@ -4,7 +4,7 @@ pacman::p_load("dotwhisker", "ggpubr")
 # ---- 1. coefplot with Average Marginal Effects ----
 
 plot_groups <- list(
-  c("Demogr.", "Female", "Non-German background"),
+  c("Demogr.", "Female", "Non-German native speaker"),
   c(
     "Prominence", "# previous books (ref. median <= 5.0)",
     "Wikipedia views (ref. median <= 8.6)"
