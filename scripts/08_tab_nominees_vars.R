@@ -1,6 +1,3 @@
-p_load("arsenal")
-
-
 # load data and category of by-varialbe to all observations
 noms_all <- readRDS("../data/nominees_rec.RDS") |>
   mutate(winner_all = "All Nominations")
@@ -8,17 +5,16 @@ noms_all <- readRDS("../data/nominees_rec.RDS") |>
 
 # prep varlist and table options
 varlist <- winner_all ~ winner +
-  female + age_nom_cat + language_nongerman +
-  books_dnb_prev_cat + wikiprizes_pre_cat + nom_prize_prev +
-  pub_reputation_mean_cat + wv_mean_cat +
+  senti_qual_cat +
   topic_history + topic_politics + topic_relations + topic_identity +
   topic_culture +
-  revs_n_cat + senti_qual_cat +
-  debut + nonfiction + jury_group
+  books_dnb_prev_cat + wikiprizes_pre_cat + nom_prize_prev +
+  pub_reputation_mean_cat + wv_mean_cat + revs_n_cat +
+  female + age_nom_cat + language_nongerman +
+  debut
 
 # Change labels
 # ? Change in recode_vars or keep originals?
-levels(noms_all$jury_group) <- c("Even gender distribution", "More women in jury", "More men in jury")
 levels(noms_all$revs_n_cat) <- c("(<= median, 4.0)", "(> median, 4.0)")
 levels(noms_all$wikiprizes_pre_cat) <- c("(<= median, 4.0)", "(> median, 4.0)")
 levels(noms_all$books_dnb_prev_cat) <- c("(<= median, 5.0)", "(> median, 5.0)")
@@ -48,18 +44,14 @@ tableby(varlist, data = noms_all, total = FALSE, cat.simplify = TRUE) |>
       wv_mean_cat = sprintf(
         "Wikipedia views %s", levels(noms_all$wv_mean_cat)[2]
       ),
-      topic_history = "Topic: History",
-      topic_politics = "Topic: Politics",
-      topic_relations = "Topic: Relations",
-      topic_identity = "Topic: Identity",
-      topic_culture = "Topic: Culture",
+      topic_history = "History",
+      topic_politics = "Politics",
+      topic_relations = "Relations",
+      topic_identity = "Identity",
+      topic_culture = "Culture",
       revs_n_cat = sprintf("# Reviews %s", levels(noms_all$revs_n_cat)[2]),
       senti_qual_cat = "Review Quality",
-      senti_mean_cat = "Review sentiment",
-      senti_vari_cat = "Variance sentiment",
-      debut = "Debut Prize ",
-      nonfiction = "Nonfiction book",
-      jury_group = "Jury Composition"
+      debut = "Debut Prize "
     )
   ) |>
   write2word(

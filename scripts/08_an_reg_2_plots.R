@@ -1,26 +1,23 @@
-pacman::p_load("dotwhisker", "ggpubr")
-
-
 # ---- 1. coefplot with Average Marginal Effects ----
 
 plot_groups <- list(
-  c("Demogr.", "Female", "Non-German native speaker"),
+  c(
+    "Quality", "No review available (ref. clearly low)",
+    "Clearly high quality"
+  ),
+  c("Topics/Zeitgeist", "History", "Culture"),
   c(
     "Prominence", "# previous books (ref. median <= 5.0)",
-    "Wikipedia views (ref. median <= 8.6)"
+    "# reviews (ref. median <= 4.0)"
   ),
-  c("Zeitgeist", "History", "Culture"),
-  c(
-    "Quality", "# reviews (ref. median <= 4.0)",
-    "Clearly high quality"
-  )
+  c("Demogr.", "Female", "Non-German native speaker")
 )
 
 
 data_log <- lapply(margins_log, summary) |>
   bind_rows(.id = "model") |>
+  mutate(term = factor) |>
   rename(
-    term = factor,
     estimate = AME,
     std.error = SE
   ) |>
@@ -29,20 +26,15 @@ data_log <- lapply(margins_log, summary) |>
     term != "debut",
     term != "nonfiction"
   ) |>
+  # remove coeficients for other models -> just one coefficient (except quality)
+  # filter(row_number() == 1 | str_detect(term, "senti_qual"), .by = term) |>
   relabel_predictors(coef_labs) |>
   mutate(
     term = as.character(term),
-    model = case_when(
-      model == "M1" ~ "Demographics",
-      model == "M2" ~ "+ Prominence",
-      model == "M3" ~ "+ Zeitgeist",
-      model == "M4" ~ "+ Quality"
-    ),
     # confidence intervalls to zero
     upper = estimate,
     lower = estimate,
-    std.error = 0,
-    # shape = as.numeric(factor(Models))
+    std.error = 0
   )
 
 
@@ -53,135 +45,75 @@ plot_log <- data_log |>
       colour = "grey60",
       linetype = 2
     ),
-    dodge_size = 0.9,
-    # model_name = "Models",
+    dodge_size = 0.8,
     style = c("dotwhisker"),
-    dot_args = list(size = 3.5),
-    whisker_args = list(size = 0.75),
-    line_args = list(alpha = 0.75, size = 12)
+    dot_args = list(size = 3.8, aes(shape = model)),
+    model_order = c("Quality", "+ Zeitgeist", "+ Prominence", "+ Demographics")
   ) +
-  theme_bw(base_size = 20) +
-  # guides(colour = guide_legend("Models")) +
-  xlab("Average Marginal Effects") + ylab("") +
   ggtitle("Predicting Winners") +
+  xlab("Average Marginal Effects") + ylab("") +
+  scale_x_continuous(breaks = seq(-0.04, 0.16, 0.02)) +
+  scale_color_discrete(guide = guide_legend(reverse = TRUE)) +
+  scale_shape_manual(values = c(18, 17, 16, 15)) +
+  guides(
+    shape = guide_legend("Model", reverse = TRUE),
+    colour = guide_legend("Model", reverse = TRUE)
+  ) +
+  theme_bw(base_size = 25) +
   theme(
     plot.title = element_text(face = "bold"),
-    plot.margin = margin(1, 1, 1, 1)
+    plot.margin = margin(1, 1, 1, 1),
+    axis.text.x = element_text(size = 12),
+    panel.grid.minor = element_blank()
   )
 
 plot_log <- plot_log |>
-  add_brackets(plot_groups, fontSize = 1.3)
+  add_brackets(plot_groups, fontSize = 1.4)
 
 # plot_log
 
 ggsave(
-  file = "../output/graphs/coefplot_log_short_multimodel.png",
-  plot = plot_log, dpi = 600, scale = 1.15, height = 9, width = 15
+  file = "../output/graphs/coefplot_log_models_qual.png",
+  plot = plot_log, dpi = 600, scale = 1.2, height = 9, width = 15
 )
 
 
 
-# ---- 2. interaction effects ----
-
-predicts_2_df <- function(vars,
-                          mod = models_log$"Full Model",
-                          vcov_mat = cl_vcov_mat) {
-  at_list <- list(
-    unique(nominees_an[vars[1]]) |> dplyr::pull(),
-    unique(nominees_an[vars[2]]) |> dplyr::pull()
-  )
-
-  names(at_list) <- c(vars[1], vars[2])
-
-  df <- margins::prediction(
-    model = mod,
-    calculate_se = TRUE,
-    vcov = vcov_mat,
-    at = at_list
-  ) |>
-    summary() |>
-    as.data.frame()
-
-  names(df) <- c(vars[1], vars[2], names(df[3:8]))
-
-  return(df)
-}
+# ---- 2. diff for quality coefficients ----
+data_log_diff <- data_log |>
+  filter(str_detect(factor, "senti_qual")) |>
+  select(model, factor, term, estimate) |>
+  # wide format to have models as variables for easy calculation
+  pivot_wider(names_from = model, values_from = "estimate") |>
+  # distract model coefficient from just quality coeffs to get diff
+  mutate(across(starts_with("+"), ~ . - Quality, .names = "diff_{col}")) |>
+  # bring back to long format for plotting
+  pivot_longer(starts_with("diff"), names_to = "model", values_to = "diff") |>
+  mutate(model = str_remove(model, "diff_"))
 
 
-#
-plot_opts <- list(
-  geom_pointrange(
-    aes(ymin = lower, ymax = upper),
-    position = position_dodge(.2)
-  ),
-  geom_hline(yintercept = 0, alpha = 0.5),
-  scale_y_continuous(breaks = seq(-0.1, 0.5, 0.1), limits = c(-0.1, 0.55)),
-  xlab(""),
-  theme_bw(base_size = 20),
+plot_log_diff <- data_log_diff |>
+  ggplot(aes(y = term, x = diff, fill = model)) +
+  geom_bar(
+    stat = "identity",
+    position = position_dodge2()
+  ) +
+  geom_vline(xintercept = 0, colour = "grey60", linetype = 2) +
+  ggtitle("Difference in AME's to base model") +
+  xlab("Percentage Points") +
+  ylab("Quality") +
+  guides(fill = guide_legend("Model", reverse = TRUE)) +
+  scale_x_continuous(breaks = seq(-0.04, 0.02, 0.01)) +
+  theme_bw(base_size = 25) +
   theme(
-    legend.title = element_blank(),
-    legend.justification = c(1.1, 1.25),
-    legend.position = c(1, 1),
-    legend.background = element_blank(),
-    plot.title = element_text(size = 20),
-    panel.grid.major.x = element_blank()
-    # legend.background = element_rect(fill='transparent'),
-    # legend.key = element_blank(),
-    # panel.background = element_rect(fill = "transparent", colour = NA),
-    # legend.box.background = element_rect(fill='transparent'),
-    # plot.background = element_rect(fill = "transparent", colour = NA)
-  )
-)
-
-
-# Plot1: Female x #metoo
-plot1 <- predicts_2_df(c("female", "metoo")) |>
-  ggplot(aes(
-    x = metoo, y = Prediction,
-    color = factor(female, labels = c("Male", "Female"))
-  )) +
-  plot_opts +
-  scale_color_brewer(type = "qual", palette = 2) +
-  ggtitle("Female x #metoo")
-
-
-# Plot2: German background x Migration
-plot2 <- predicts_2_df(c("language_german", "syria")) |>
-  ggplot(aes(
-    x = syria, y = Prediction,
-    color = factor(language_german, labels = c("Non-German", "German"))
-  )) +
-  plot_opts +
-  scale_color_manual(values = c("#7570b3", "#e7298a")) +
-  ggtitle("German background x Migration") +
-  theme(
-    axis.text.y = element_blank(),
-    axis.title.y = element_blank(),
-    axis.ticks.y = element_blank()
+    plot.title = element_text(face = "bold"),
+    plot.margin = margin(1, 1, 1, 1),
+    panel.grid.minor = element_blank()
   )
 
-# Plot3: Female x Jury Composition
-plot3 <- predicts_2_df(c("female", "jury_group")) |>
-  mutate(jury_group = forcats::fct_relevel(
-    jury_group, "more male", "even", "more female"
-  )) |>
-  ggplot(aes(
-    x = jury_group, y = Prediction,
-    color = factor(female, labels = c("Male", "Female"))
-  )) +
-  plot_opts +
-  scale_color_brewer(type = "qual", palette = 2) +
-  ggtitle("Female x Jury Composition") +
-  theme(
-    axis.text.y = element_blank(),
-    axis.title.y = element_blank(),
-    axis.ticks.y = element_blank()
-  )
-
-
-plots_interactions <- ggarrange(plot1, plot2, plot3, nrow = 1)
+# plot_log_diff
 
 ggsave(
-  file = "../output/graphs/interactions_log_predictions.png",
-  plot = plots_interactions, dpi = 500, scale = 1.3, height = 8, width = 15
+  file = "../output/graphs/diffplot_log_qual.png",
+  plot = plot_log_diff, dpi = 600, scale = 1.2, height = 9, width = 15
 )
