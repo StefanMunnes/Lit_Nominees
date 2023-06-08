@@ -17,7 +17,9 @@ pacman::p_load(
   "wikipediatrend", # Wikidata
   "lubridate", # interval
   "stargazer",
-  "haven"
+  "haven",
+  "sandwich", "margins", "dotwhisker", "ggpubr",
+  "modelsummary", "flextable", "officer", "arsenal"
 )
 
 try(setwd("scripts/"))
