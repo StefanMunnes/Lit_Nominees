@@ -10,6 +10,7 @@ pacman::p_load(
   "rvest", # read_html(), html_nodes(), html_text()
   "purrr", # keep()
   "ggplot2",
+  "forcats",
   "rdnb", # Deutsche Nationalbibliothek
   "httr",
   "xml2",

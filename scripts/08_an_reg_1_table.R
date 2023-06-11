@@ -1,6 +1,6 @@
 sect_properties <- prop_section(
   page_size = page_size(
-    orient = "portrait",
+    orient = "landscape",
   ),
   # page_mar(top = NULL),
   type = "continuous"
