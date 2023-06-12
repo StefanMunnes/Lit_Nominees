@@ -60,6 +60,8 @@ nominees_rec <- nominees |>
       relevel(ref = "even"),
   )
 
+nominees_rec <- fastDummies::dummy_cols(nominees_rec, select_columns = "prize")
+
 
 # Save dataset
 saveRDS(nominees_rec, file = "../data/nominees_rec.RDS")

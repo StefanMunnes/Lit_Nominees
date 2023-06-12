@@ -52,7 +52,16 @@ model_formulars <- c(
     nom_prize_prev + pub_reputation_mean_cat + wv_mean_cat +
     topic_history + topic_culture +
     topic_identity + topic_politics + topic_relations +
-    female + age_nom_cat + language_nongerman
+    female + age_nom_cat + language_nongerman,
+  "+ Prize FE" = winner ~ debut + senti_qual_cat +
+    revs_n_cat +
+    books_dnb_prev_cat + wikiprizes_pre_cat +
+    nom_prize_prev + pub_reputation_mean_cat + wv_mean_cat +
+    topic_history + topic_culture +
+    topic_identity + topic_politics + topic_relations +
+    female + age_nom_cat + language_nongerman +
+    prize_deutscher + prize_leipziger +
+    prize_oesterreich + prize_oesterreich_debuet + prize_schweiz
 )
 
 
@@ -61,10 +70,6 @@ models_log <- lapply(model_formulars, function(m) {
   glm(m, data = nominees_an, family = "binomial")
 })
 
-# old -> needed in interaction plots
-# cl_vcov_mat <- vcovCL(models_log$"M4",
-#   cluster = ~prize
-# )
 
 margins_log <- lapply(models_log, function(model) {
   margins(model, vcov = vcovCL(model, cluster = ~prize))
