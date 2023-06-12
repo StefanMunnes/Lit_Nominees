@@ -8,17 +8,16 @@ plot_groups <- list(
     "Quality", "No review available (ref. clearly low)",
     "Clearly high quality"
   ),
-  # c("# Rev.", "# reviews (ref. median <= 4.0)", "# reviews (ref. median <= 4.0)"),
   c(
     "Prominence", "# previous books (ref. median <= 5.0)",
     "Wikipedia views (ref. median <= 8.6)"
   ),
   c("Topics/Zeitgeist", "History", "Culture"),
-  c("Demogr.", "Female", "Non-German native speaker")
+  c("Demogr.", "Female", "Non-native German speaker")
 )
 
 
-data_log <- lapply(margins_log, summary) |>
+data_log <- lapply(margins_log[1:5], summary) |>
   bind_rows(.id = "model") |>
   mutate(term = factor) |>
   rename(
@@ -27,12 +26,6 @@ data_log <- lapply(margins_log, summary) |>
   ) |>
   filter(term != "debut") |>
   relabel_predictors(coef_labs) |>
-  # remove coeficients for other models -> just one coefficient (except quality)
-  # but before and after: restore order of varialbes
-  # mutate(index = row_number()) |>
-  # arrange(desc(index)) |>
-  # filter(row_number() == 1 | str_detect(factor, "senti_qual"), .by = factor) |>
-  # arrange(index) |>
   mutate(
     term = as.character(term),
     # confidence intervalls to zero
@@ -49,10 +42,10 @@ plot_log <- data_log |>
       colour = "grey60",
       linetype = 2
     ),
-    dodge_size = 1,
+    dodge_size = .9,
     style = c("dotwhisker"),
     dot_args = list(size = 3.8, aes(shape = model)),
-    model_order = names(margins_log)
+    model_order = names(margins_log[1:5])
   ) +
   ggtitle("Predicting Winners") +
   xlab("Average Marginal Effects") + ylab("") +
