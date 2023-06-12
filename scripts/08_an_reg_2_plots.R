@@ -74,13 +74,70 @@ plot_log <- plot_log |>
 # plot_log
 
 ggsave(
-  file = "../output/graphs/coefplot_log_models_qual.png",
+  file = "../output/graphs/coefplot_log_ame.png",
   plot = plot_log, dpi = 600, scale = 1.2, height = 11, width = 15
 )
 
 
 
-# ---- 2. diff for quality coefficients ----
+# ---- 2. same coefplot for margins but with CIs ----
+data_log_ci <- lapply(margins_log[1:5], summary) |>
+  bind_rows(.id = "model") |>
+  mutate(term = factor) |>
+  rename(
+    estimate = AME,
+    std.error = SE
+  ) |>
+  filter(term != "debut") |>
+  relabel_predictors(coef_labs) |>
+  mutate(term = as.character(term))
+
+
+plot_log_ci <- data_log_ci |>
+  dwplot(
+    vline = geom_vline(
+      xintercept = 0,
+      colour = "grey60",
+      linetype = 2
+    ),
+    dodge_size = .9,
+    style = c("dotwhisker"),
+    dot_args = list(size = 3.8, aes(shape = model)),
+    model_order = names(margins_log[1:5])
+  ) +
+  ggtitle("Predicting Winners") +
+  xlab("Average Marginal Effects") + ylab("") +
+  scale_x_continuous(breaks = seq(-0.1, 0.25, 0.05)) +
+  scale_color_manual(
+    values = colors_5,
+    guide = guide_legend(reverse = TRUE)
+  ) +
+  scale_shape_manual(values = c(18, 17, 16, 15, 25)) +
+  guides(
+    shape = guide_legend("Model", reverse = TRUE),
+    colour = guide_legend("Model", reverse = TRUE)
+  ) +
+  theme_bw(base_size = 25) +
+  theme(
+    plot.title = element_text(face = "bold"),
+    plot.margin = margin(1, 1, 1, 1),
+    axis.text.x = element_text(size = 12),
+    panel.grid.minor = element_blank()
+  )
+
+
+plot_log_ci <- plot_log_ci |>
+  add_brackets(plot_groups, fontSize = 1.4)
+
+# plot_log_ci
+
+ggsave(
+  file = "../output/graphs/coefplot_log_ame_ci.png",
+  plot = plot_log_ci, dpi = 600, scale = 1.2, height = 11, width = 15
+)
+
+
+# ---- 3. diff for quality coefficients ----
 data_log_diff <- data_log |>
   filter(str_detect(factor, "senti_qual")) |>
   select(model, factor, term, estimate) |>
@@ -106,7 +163,6 @@ plot_log_diff <- data_log_diff |>
     position = position_dodge2()
   ) +
   geom_vline(xintercept = 0, colour = "grey60", linetype = 2) +
-  ggtitle("Difference in AME's to base model") +
   xlab("Percentage Points") +
   ylab("Quality") +
   guides(fill = guide_legend("Model", reverse = TRUE)) +
