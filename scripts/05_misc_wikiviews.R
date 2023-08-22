@@ -1,4 +1,3 @@
-
 # ---- 1. load and combine  data ----
 
 # nominee data from perlentaucher
@@ -92,5 +91,5 @@ wikiviews_pre <- wikiviews_pre_ls |>
     wiki_url
   )
 
-  
+
 saveRDS(wikiviews_pre, file = "../data/wikiviews_pre.RDS")
