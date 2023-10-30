@@ -1,5 +1,7 @@
-
-nominees_rec <- readRDS("../data/nominees_rec.RDS") |> select(url_book)
+nominees_rec <- readRDS("../data/nominees_rec.RDS") |>
+  select(url_book) |>
+  distinct() |>
+  na.omit()
 reviews_gndr <- readRDS("../data/reviews_gndr.RDS")
 
 reviews_gndr_nom <- left_join(nominees_rec, reviews_gndr, by = "url_book")
@@ -11,10 +13,30 @@ rev_gndr_year <- reviews_gndr_nom |>
   mutate(year = year(date)) |>
   filter(!is.na(rev_gndr)) |>
   count(rev_gndr, year, sort = TRUE) |>
-  mutate(freq = n / sum(n), .by = year)
+  mutate(prop = n / sum(n), .by = year)
+
+
+rev_gndr_year2 <- reviews_gndr_nom |>
+  mutate(year = year(date)) |>
+  distinct(year, rev_name, rev_gndr) |>
+  na.omit() |>
+  count(rev_gndr, year, sort = TRUE) |>
+  mutate(prop = n / sum(n), .by = year) |>
+  bind_rows(rev_gndr_year, .id = "Object") |>
+  mutate(Object = case_when(Object == 1 ~ "Reviewer", Object == 2 ~ "Reviews"))
+
+
+plot_rev_gndr_year <- rev_gndr_year2 |>
+  ggplot(aes(y = prop, x = year, color = rev_gndr, linetype = Object)) +
+  geom_line(linewidth = 1.5) +
+  geom_hline(yintercept = 0.5) +
+  scale_color_discrete(breaks = c("M", "F")) +
+  labs(color = "Gender", x = "", y = "") +
+  theme_bw()
+
 
 plot_rev_gndr_year <- rev_gndr_year |>
-  ggplot(aes(y = freq, x = year, color = rev_gndr)) +
+  ggplot(aes(y = prop, x = year, color = rev_gndr)) +
   geom_line(linewidth = 1.5) +
   geom_hline(yintercept = 0.5) +
   scale_color_discrete(breaks = c("M", "F")) +
@@ -30,7 +52,6 @@ ggsave(
 
 # ---- 2. overview of proportion of # of reviews of top reviewers ----
 rev_gndr_name <- reviews_gndr_nom |>
-  separate_rows(rev_name, sep = ";") |>
   count(rev_name, rev_gndr, sort = TRUE) |>
   mutate(
     cum = cumsum(n),
@@ -43,19 +64,13 @@ rev_gndr_name <- reviews_gndr_nom |>
   )
 
 ## get descriptives for reviewers and gender
-sum(rev_gndr_name$n) # # of reviews: 2949
+sum(rev_gndr_name$n) # # of reviews: 2473
 nrow(rev_gndr_name) # # of unique reviewer: 501
-(tab  <- table(rev_gndr_name$rev_gndr, useNA = "always"))
-prop.table(tab) # F: 198 (40%) M: 302 (60%)
+(tab <- table(rev_gndr_name$rev_gndr, useNA = "always"))
+prop.table(tab) # F: 198 (39.5%) M: 302 (60.3%)
 
-data_top_50 <- filter(rev_gndr_name, cumprop < 0.5)
-# 39 (7.78%) of reviewers wrote half (1475) of all reviews (2949)
-sum(data_top_50$n) # 1475
-length(data_top_50$n) # 39
-table(data_top_50$rev_gndr) # F: 20, M: 38, NA: 1
-
-# Number of reviews from the most important reviewers F: 538, M: 894
-summarize(data_top_50, n = sum(n), .by = rev_gndr)
+summarize(rev_gndr_name, sum = sum(n), .by = rev_gndr) |>
+  mutate(prop = sum / sum(sum)) # F: 945 (38.2) M: 1827 (61.7)
 
 
 ## create plot of most important reviewers
@@ -86,3 +101,12 @@ ggsave(
   file = "../output/graphs/plot_revs_gndr_top.png",
   plot = plot_revs_gndr_top, dpi = 600, scale = 0.9, height = 9, width = 11
 )
+
+data_top_50 <- filter(rev_gndr_name, cumprop < 0.5)
+# 39 (7.78%) of reviewers wrote half (1226) of all reviews (2473)
+sum(data_top_50$n) # 1226
+length(data_top_50$n) # 40
+table(data_top_50$rev_gndr) # F: 15, M: 25
+
+# # of reviews from the most important reviewers F: 458, M: 768
+summarize(data_top_50, n = sum(n), .by = rev_gndr)
