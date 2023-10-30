@@ -18,7 +18,7 @@ varlist <- winner_all ~ winner +
 
 tableby(varlist,
   data = noms_all, total = FALSE, cat.simplify = TRUE,
-  numeric.stats = c("Nmiss", "meansd", "range")
+  numeric.stats = c("Nmiss", "meansd", "range"), digits = 1
 ) |>
   set_labels(
     list(

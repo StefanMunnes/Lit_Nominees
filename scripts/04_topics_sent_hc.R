@@ -1,4 +1,3 @@
-
 # ---- 1. load and merge shiny raw data ----
 
 shiny_raw <- lapply(c("01", "02", "03"), function(dir) {
@@ -23,11 +22,11 @@ shiny_raw <- lapply(c("01", "02", "03"), function(dir) {
 # ---- 2. load further data to keep just reviews before prize ----
 
 nominees_pt <- readRDS("../data/nominees_pt.RDS") |>
-  select(url_book, prize, ynom, match_id) |>
+  dplyr::select(url_book, prize, ynom, match_id) |>
   na.omit() # remove books with no book url -> no pt -> no sentiment
 
 # date of nomination, prize receipt and ceremony
-dates <- read_xlsx("../data/preise_daten.xlsx") |>
+dates <- readxl::read_xlsx("../data/preise_daten.xlsx") |>
   select(prize, ynom, winner_announced)
 
 # load review data to get book url by review text and add prize and date
