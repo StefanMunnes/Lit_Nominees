@@ -1,4 +1,3 @@
-
 # ---- 1. load necessary data ----
 
 # prepared nominee data from perlentaucher (prizes + books + reviews)
@@ -103,7 +102,7 @@ nominees <- nominees_pt |>
   ) |>
   filter(row_number() == 1) |>
   # 5. times of nomination and previous nominations for each author and prize
-  group_by(url_name, prize) |> # MK: Why group by prize?
+  group_by(url_name, prize) |>
   arrange(ynom) |>
   mutate(
     nom_prize_n = n(),

@@ -1,4 +1,3 @@
-
 url_wiki <- "https://de.wikipedia.org"
 
 # ---- scrape all wikipedia htmls from german-speaking book prizes ----
@@ -91,7 +90,7 @@ urls_prizes_all <- c(
     "/wiki/H._C._Artmann-Stipendium",
     "/wiki/Kitzbüheler_Stadtschreiber",
 
-    # add mising price manually
+    # add missing price manually
     "/wiki/Friedrich-Glauser-Preis",
 
     # add certain theater prizes manually; source: /wiki/Theaterpreis
