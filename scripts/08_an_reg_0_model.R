@@ -14,13 +14,7 @@ coef_labs <- c(
   "revs_n_cat> median (4.0)" =
     "# reviews (ref. median <= 4.0)",
   "revs_n" = "# reviews",
-  "topic_history" = "History",
-  "topic_politics" = "Politics",
-  "topic_relations" = "Relations",
-  "topic_identity" = "Identity",
-  "topic_culture" = "Culture",
-  "books_dnb_prev_cat> median (5.0)" =
-    "# previous books (ref. median <= 5.0)",
+  "books_dnb_prev_cat> median (5.0)" = "# previous books (ref. median <= 5.0)",
   "books_dnb_prev" = "# previous books",
   "wikiprizes_pre_cat> median (4.0)" =
     "# previous prizes (ref. median <= 4.0)",
@@ -31,6 +25,11 @@ coef_labs <- c(
   "pub_reputation_mean" = "Publisher reputation",
   "wv_mean_cat> median (8.6)" = "Wikipedia views (ref. median <= 8.6)",
   "wv_mean" = "Wikipedia views",
+  "topic_history" = "History",
+  "topic_politics" = "Politics",
+  "topic_relations" = "Relations",
+  "topic_identity" = "Identity",
+  "topic_culture" = "Culture",
   "female" = "Female",
   "age_nom_cat> median (43.0)" = "Higher age (ref. median <= 43.0)",
   "age_nom" = "Age",
@@ -42,11 +41,11 @@ model_formulars <- c(
   "Quality" = winner ~ debut + senti_qual_cat,
   "+ # Reviews" = winner ~ debut + senti_qual_cat +
     revs_n_cat,
-  "+ Zeitgeist" = winner ~ debut + senti_qual_cat +
-    revs_n_cat +
-    topic_history + topic_culture +
-    topic_identity + topic_politics + topic_relations,
   "+ Prominence" = winner ~ debut + senti_qual_cat +
+    revs_n_cat +
+    books_dnb_prev_cat + wikiprizes_pre_cat +
+    nom_prize_prev + pub_reputation_mean_cat + wv_mean_cat,
+  "+ Zeitgeist" = winner ~ debut + senti_qual_cat +
     revs_n_cat +
     books_dnb_prev_cat + wikiprizes_pre_cat +
     nom_prize_prev + pub_reputation_mean_cat + wv_mean_cat +

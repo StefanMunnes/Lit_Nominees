@@ -16,11 +16,11 @@ plot_groups <- list(
     "Quality", "No review available (ref. clearly low)",
     "Clearly high quality"
   ),
+  c("Topics/Zeitgeist", "History", "Culture"),
   c(
     "Prominence", "# previous books (ref. median <= 5.0)",
     "Wikipedia views (ref. median <= 8.6)"
   ),
-  c("Topics/Zeitgeist", "History", "Culture"),
   c("Demogr.", "Female", "Non-native German speaker")
 )
 
