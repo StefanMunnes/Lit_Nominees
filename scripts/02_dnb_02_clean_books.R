@@ -1,4 +1,3 @@
-
 # ---- clean and prepare DNB author & title data ----
 
 dnb_books_all <- readRDS("../data/dnb_books_raw.RDS") |>
@@ -68,7 +67,10 @@ dnb_books_all <- readRDS("../data/dnb_books_raw.RDS") |>
     ),
 
     # first letter of each part of name in uppercase
-    author = str_to_title(author),
+    across(
+      c(author, author_search),
+      ~ str_to_title(author)
+    ),
 
     # NA for author_id if NOID wildcard (keep right order for spliting contribs)
     author_id = ifelse(author_id == "NOID", NA, author_id),

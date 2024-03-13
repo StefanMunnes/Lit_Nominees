@@ -1,11 +1,14 @@
-
 # load data
 prizes_df <- readRDS("../data/pt_prizes.RDS")
 dnb_books_all <- readRDS("../data/dnb_books_all.RDS")
 dnb_authors_all <- readRDS("../data/dnb_authors.RDS")
 
+
 # ---- 1. merge nominees with DNB data for correct author ID (and filter correct book) ----
-prizes_dnb_unique <- left_join(prizes_df, dnb_books_all, by = c("match_id")) |>
+prizes_dnb_unique <- left_join(
+  prizes_df, dnb_books_all, 
+  by = c("match_id"), relationship = "many-to-many"
+) |>
   group_by(match_id, prize, ynom) |>
   mutate(
     same_match_id = n(), # info about number of book variants

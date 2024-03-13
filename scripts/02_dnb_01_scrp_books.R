@@ -1,4 +1,3 @@
-
 # ---- 1. prepare unique author names for DNB scraping loop ----
 authors_dnb <- readRDS("../data/pt_prizes.RDS") |>
   pull(name) |>
@@ -6,15 +5,12 @@ authors_dnb <- readRDS("../data/pt_prizes.RDS") |>
   stri_trans_general("de-ASCII") |>
   str_remove_all("\\.") |>
   str_replace("(.*)\\s([A-z-]+$)", "\\2, \\1") |>
-
   # correct name (two last names)
   str_replace("Abonji, Melinda Nadj", "Nadj Abonji, Melinda") |>
-
   # shorten names (otherwise not found at DND) -> change back later
   str_replace("Altwasser, Volker Harry", "Altwasser, Volker") |>
   str_replace("Cole, Isabel Fargo", "Cole, Isabel") |>
   append("Salzmann, Marianna") # same as original: Salzmann, Sasha Marianna
-
 
 
 # ---- 2. scrape DNB by author names ----
@@ -25,7 +21,6 @@ source("dnb_fnct/utils.R")
 
 
 dnb_books_ls <- lapply(authors_dnb, function(author) {
-
   Sys.sleep(1)
 
   message(author)

@@ -1,4 +1,3 @@
-
 # ---- scrape author information from DNB with unique IDs ----
 
 dnb_authors_ids <- readRDS("../data/dnb_books_all.RDS") |>
