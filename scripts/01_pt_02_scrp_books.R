@@ -1,6 +1,6 @@
 # scrape book information from perlentaucher from list of nomineed books
 
-prizes_df <- readRDS("../data/prizes_xlsx.RDS")
+prizes_df <- readRDS("../data/pt_prizes.RDS")
 
 authors_url <- unique(prizes_df$url_name)
 
@@ -9,6 +9,7 @@ authors_url <- c(authors_url, "stefanie-de-velasco-8iv")
 
 authors_url[authors_url == "thomas-meyer"] <- "thomas-meyer-6sz"
 authors_url[authors_url == "antje-ravic-strubel"] <- "antje-ravik-strubel"
+authors_url[authors_url == "mariam-kuehsel-hussaini"] <- "mariam-kuehsel-husseini"
 
 authors_url <- sort(authors_url)
 
@@ -48,7 +49,7 @@ missing <- keep(books_ls, plyr::empty)
 
 
 # ---- 3. create and recode dataframe from list of scraped dataframes ----
-books_df2 <- bind_rows(books_ls, .id = "url_name") %>%
+books_df <- bind_rows(books_ls, .id = "url_name") %>%
   separate(header, c("authors", "work"),
     sep = ":", extra = "merge", fill = "right"
   ) %>%
@@ -87,4 +88,4 @@ books_df2 <- bind_rows(books_ls, .id = "url_name") %>%
   ungroup()
 
 
-saveRDS(books_df2, file = "../data/pt_books.RDS")
+saveRDS(books_df, file = "../data/pt_books.RDS")

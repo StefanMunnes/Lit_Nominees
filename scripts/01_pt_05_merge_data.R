@@ -1,4 +1,3 @@
-
 # ---- combine book, review, and prize information ----
 
 prizes_df <- readRDS("../data/pt_prizes.RDS")
@@ -22,6 +21,7 @@ nominees_pt <- full_join(books_df, reviews_gndr_df, by = "url_book") |>
       str_detect(url_name, "stefanie-de-velasco") ~ "stefanie-de-velasco",
       str_detect(url_name, "thomas-meyer") ~ "thomas-meyer",
       str_detect(url_name, "antje-ravi") ~ "antje-ravic-strubel",
+      str_detect(url_name, "mariam-kuehsel") ~ "mariam-kuehsel-hussaini",
       TRUE ~ url_name
     ),
     title = str_squish(title),
@@ -34,6 +34,9 @@ nominees_pt <- full_join(books_df, reviews_gndr_df, by = "url_book") |>
   ungroup() |>
   # add prize information (also multiple prizes for a single books)
   full_join(prizes_df, by = "match_id", suffix = c(".pt", ".xlsx")) |>
+  # keep just nominees (drop all books by authors who have not been nominated)
+  filter(!is.na(prize)) |>
+  # fill and keep just one variant of variables
   mutate(
     no_pt = is.na(url_book),
     authors = ifelse(is.na(authors), name, authors),
@@ -44,8 +47,6 @@ nominees_pt <- full_join(books_df, reviews_gndr_df, by = "url_book") |>
     age_nom = ynom - ybirth, # age in year of nomination
     debut = prize %in% c("oesterreich_debuet", "aspekte")
   ) |>
-  # keep just nominees (drop all books by authors who have not been nominated)
-  filter(!is.na(prize)) |>
   select(
     authors, title, subti, prize, ynom, shortlist, winner, debut,
     ypub, publisher, pub_place, authors_n,

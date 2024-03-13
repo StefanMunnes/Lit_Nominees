@@ -6,7 +6,9 @@ prizes <- c(
   "schweiz", "text_sprache"
 )
 
-prizes_raw_ls <- lapply(paste0("../data/prizes_xlsx/", prizes, "_buchpreis.xlsx"), read_xlsx)
+prizes_raw_ls <- lapply(
+  paste0("../data/prizes_xlsx/", prizes, "_buchpreis.xlsx"), readxl::read_xlsx
+)
 names(prizes_raw_ls) <- prizes
 
 prizes_raw <- bind_rows(prizes_raw_ls, .id = "Preis") |>
@@ -15,7 +17,10 @@ prizes_raw <- bind_rows(prizes_raw_ls, .id = "Preis") |>
 
 
 # ---- 2. load and clean different formated deutscher Buchpreis sepratly ----
-dbp_raw <- read_xlsx("../data/prizes_xlsx/deutscher_buchpreis.xlsx", skip = 3) |>
+dbp_raw <- readxl::read_xlsx(
+  "../data/prizes_xlsx/deutscher_buchpreis.xlsx",
+  skip = 3
+) |>
   separate_rows(Gewonnen, Shortlist, Longlist, sep = "; ") |>
   # produce some duplicates if books in multiple columns in excel
   pivot_longer(c(Gewonnen, Shortlist, Longlist),
@@ -79,30 +84,31 @@ if (nrow(test) > 0) {
 
 
 prizes_df <- prizes_df |>
-  mutate(across(
-    c(shortlist, academic, institute, winner),
-    ~ ifelse(str_detect(.x, "[jJ]a"), TRUE, FALSE)
-  ),
-  institute = case_when(name == "Carmen Buttjer" ~ FALSE, TRUE ~ institute),
-  female = ifelse(female == "w", TRUE, FALSE),
-  prize = as.factor(prize),
-  shortlist = ifelse(prize %in% c(
-    "aspekte", "leipziger", "oesterreich_debuet",
-    "schweiz", "text_sprache"
-  ), NA, shortlist),
-  language = case_when(
-    str_detect(language, "(Deutsch/)|(/Deutsch)") ~ "german+",
-    str_detect(language, "Deutsch") ~ "german",
-    !str_detect(language, "Deutsch") &
-      !str_detect(language, "/") ~ "foreign",
-    !str_detect(language, "Deutsch") ~ "foreign+",
-    # manually add language for 2 authors
-    # https://www.amazon.de/Levi-Roman-Carmen-Buttjer/dp/3442718007
-    str_detect(name, "Carmen Buttjer") ~ "german+",
-    # https://www.srf.ch/kultur/literatur/tuerken-in-deutschland-ich-lebte-in-zwei-parallelen-welten
-    str_detect(name, "Cihan Acar") ~ "german+"
-  ),
-  language = as.factor(language)
+  mutate(
+    across(
+      c(shortlist, academic, institute, winner),
+      ~ ifelse(str_detect(.x, "[jJ]a"), TRUE, FALSE)
+    ),
+    institute = case_when(name == "Carmen Buttjer" ~ FALSE, TRUE ~ institute),
+    female = ifelse(female == "w", TRUE, FALSE),
+    prize = as.factor(prize),
+    shortlist = ifelse(prize %in% c(
+      "aspekte", "leipziger", "oesterreich_debuet",
+      "schweiz", "text_sprache"
+    ), NA, shortlist),
+    language = case_when(
+      str_detect(language, "(Deutsch/)|(/Deutsch)") ~ "german+",
+      str_detect(language, "Deutsch") ~ "german",
+      !str_detect(language, "Deutsch") &
+        !str_detect(language, "/") ~ "foreign",
+      !str_detect(language, "Deutsch") ~ "foreign+",
+      # manually add language for 2 authors
+      # https://www.amazon.de/Levi-Roman-Carmen-Buttjer/dp/3442718007
+      str_detect(name, "Carmen Buttjer") ~ "german+",
+      # https://www.srf.ch/kultur/literatur/tuerken-in-deutschland-ich-lebte-in-zwei-parallelen-welten
+      str_detect(name, "Cihan Acar") ~ "german+"
+    ),
+    language = as.factor(language)
   ) |>
   separate(title,
     into = c("title", "subti"), sep = "[.][^.]*\\s*",

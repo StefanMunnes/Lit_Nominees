@@ -104,7 +104,6 @@ reviews_df <- bind_rows(reviews_ls, .id = "url_book") %>%
   mutate(rev_intro = str_sub(text, 1, 15)) %>%
   distinct(url_book, news, date, rev_intro, .keep_all = T) %>%
   select(!c(napt, rev_intro)) %>%
-  reviews_df() <- reviews_df |>
   # correct book (sub-)titles manually to fit with DNB and published book titles
   mutate(
     title = case_when(
