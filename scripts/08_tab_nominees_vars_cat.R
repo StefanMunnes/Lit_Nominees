@@ -20,7 +20,7 @@ levels(noms_all$revs_n_cat) <- c("(<= median, 4.0)", "(> median, 4.0)")
 levels(noms_all$wikiprizes_pre_cat) <- c("(<= median, 4.0)", "(> median, 4.0)")
 levels(noms_all$books_dnb_prev_cat) <- c("(<= median, 5.0)", "(> median, 5.0)")
 levels(noms_all$pub_reputation_mean_cat) <- c("(<= median, 4.4)", "(> median, 4.4)")
-levels(noms_all$wv_mean_cat) <- c("(<= median, 8.6)", "(> median, 8.6)")
+levels(noms_all$wv_mean_cat) <- c("(<= median, 8.5)", "(> median, 8.5)")
 levels(noms_all$age_nom_cat) <- c("(<= median, 43)", "(> median, 43)")
 
 
