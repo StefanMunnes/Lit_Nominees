@@ -47,7 +47,9 @@ codes <- read.csv("../data/topics_hc.csv", encoding = "UTF-8") |>
 
 # join review data by text to get unique book url (possible duplicates by title)
 # inner_join: remove books/sentiments with no prize (13/38) & 8x no hand coding
-sent_topics <- inner_join(shiny_raw, revs_book_url, by = "text") |>
+# many-to-many: multiple raters same review to same review multiple prizes
+sent_topics <- shiny_raw |>
+  inner_join(revs_book_url, by = "text", relationship = "many-to-many") |>
   # get rater number from file name & prepare sentiment and topic
   mutate(
     rater = str_sub(file, -7, -7),
@@ -132,23 +134,33 @@ sent_topics <- inner_join(shiny_raw, revs_book_url, by = "text") |>
   filter(row_number() == 1) |>
   ungroup() |>
   select(
-    title, url_book, revs_n_st, revs_n_nomis_st, rater_n_st,
-    senti_mean, senti_vari, starts_with("topic_"), topics_orig, prize, ynom
+    title, , prize, ynom, url_book, revs_n_st, revs_n_nomis_st, rater_n_st,
+    senti_mean, senti_vari, starts_with("topic_"), topics_orig
   )
+
+
+sent_topics <- bind_rows(
+  sent_topics,
+  readRDS("../data/tmp_sentiment_aspekte_new.RDS")
+) |>
+  # add one last missing book by hand
+  bind_rows(
+    data.frame(
+      title = "In seiner frühen Kindheit ein Garten",
+      url_book = "/buch/christoph-hein/in-seiner-fruehen-kindheit-ein-garten.html",
+      revs_n_st = 5, revs_n_nomis_st = 5, rater_n_st = 1,
+      senti_mean = 1.8, senti_vari = 1.7,
+      topic_history = TRUE, topic_politics = TRUE, topic_relations = TRUE,
+      topic_identity = FALSE, topic_culture = FALSE,
+      prize = "leipziger", ynom = 2005
+    )
+  ) |>
+  # filter duplicates: keep just last (newest with more tester)
+  filter(row_number() == n(), .by = c("url_book", "prize", "ynom"))
 
 
 saveRDS(sent_topics, "../data/sentiment_topics.RDS")
 
 
-# From Line 62
-# SM: a <- group_by(sent_topics, title) |> filter(n_distinct(url_book) > 1)
-# Die Erziehung des Mannes: enthält eine Rezension zu zwei Büchern: Sentiment für Doppelrezension raus
-# Brüder und Schwestern: 2 Bücher von selbem Autor: gleiches Buch, gleicher Inhalt?: sentiment für zweites Buch raus
-# Außer sich: zwei verschiedene Bücher: trennen, erstes keine Topics
-
-# From Line 118
-# JV: 4 books lose topics
-#     Apostoloff                      C;A;D     2
-#     Annette, ein Heldinnenepos      Epos;A;B  1
-#     Ambra                           C;A;A     1
-#     Am Ende schmeißen wir mit Gold  D;E       0
+# ! we have different values for sentiment for same books if one for later prize
+# (keeps more reviews valid from date)
