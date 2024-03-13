@@ -5,16 +5,18 @@ nominees_pt <- readRDS("../data/nominees_pt.RDS")
 
 # sentiment and topics
 sent_topics <- readRDS("../data/sentiment_topics.RDS") |>
-  distinct(across(url_book:topics_orig))
+  select(!title)
 
 # missing topics
-codes_last_miss <- read_xlsx("../data/topics_last_miss.xlsx") |>
+codes_last_miss <- readxl::read_xlsx("../data/topics_last_miss.xlsx") |>
   pivot_wider(names_from = "value")
 
 codes_mi <- read.csv("../data/topics_hc_mi.csv", encoding = "UTF-8") |>
   select(match_id, value) |>
   pivot_wider(names_from = "value") |>
-  bind_rows(codes_last_miss)
+  bind_rows(codes_last_miss) |>
+  # remove one wrong book with already 3 topics
+  dplyr::filter(match_id != "christoph-hein_in-seiner-_37")
 
 # Publisher Information
 publisher <- read.csv("../data/publisherstatus/publisherstatus_new.csv",
@@ -22,7 +24,7 @@ publisher <- read.csv("../data/publisherstatus/publisherstatus_new.csv",
 )
 
 # Jury Information
-jury <- read_xlsx("../data/prizes_xlsx/Jury_allprices.xlsx") %>%
+jury <- readxl::read_xlsx("../data/prizes_xlsx/Jury_allprices.xlsx") %>%
   group_by(ynom, prize) %>%
   mutate(jury_fem = round(sum(Jury_F) / sum(Jury_F, Jury_M), 2)) %>%
   select(ynom, prize, jury_fem)
@@ -34,7 +36,8 @@ dnb_books <- readRDS("../data/dnb_books_prize.RDS") |>
   select(!match_id)
 
 # wikipedia data
-wikiviews_pre <- readRDS("../data/wikiviews_pre.RDS")
+wikiviews_pre <- readRDS("../data/wikiviews_pre.RDS") |>
+  filter(!is.na(prize)) # remove one wrong observations not in nominees list
 
 # all prizes/nominations from wikipedia (before nomination)
 wikiprizes_authors <- readRDS("../data/wp_prizes_authors.RDS") |>
@@ -49,7 +52,10 @@ wikiprizes_authors <- readRDS("../data/wp_prizes_authors.RDS") |>
 
 nominees <- nominees_pt |>
   # 1. add sentiment and topics
-  full_join(sent_topics, by = "url_book", suffix = c("_pt", "_st")) |>
+  full_join(
+    sent_topics,
+    by = c("url_book", "prize", "ynom"), suffix = c("_pt", "_st")
+  ) |>
   mutate(
     no_prize = is.na(prize),
     no_senttop = is.na(senti_mean)
@@ -88,12 +94,15 @@ nominees <- nominees_pt |>
     publisher == "Zsolnay" ~ "Zsolnay Verlag",
     publisher == "DVA" ~ "Deutsche Verlags-Anstalt (DVA)",
     match_id == "konstantin-kuespert_rechtes-de_46" ~ "Suhrkamp",
-    .default ~ publisher
+    .default = publisher
   )) |>
   left_join(publisher, by = "publisher") |>
   rename(pub_reputation_mean = mean_reputation) |>
   # 4. number of books before nomination (by list of DNB books)
-  full_join(dnb_books, by = "url_name") |>
+  # many-to-many: multiple books per author; auhtor multiple times in nominees
+  full_join(dnb_books, by = "url_name", relationship = "many-to-many") |>
+  # remove additional url_name observsations not from nominees list
+  filter(!is.na(prize)) |>
   group_by(url_name, prize, ynom) |>
   mutate(
     books_dnb_n = n(),
@@ -122,11 +131,18 @@ nominees <- nominees_pt |>
         wiki_url
       )
   ) |>
-  full_join(wikiprizes_authors, by = "wiki_url") |>
+  # 8. Add list of Prizes (just year) for each author: count sum before ynom
+  # many-to-many: multiple prizes per author; auhtor multiple times in nominees
+  full_join(
+    wikiprizes_authors,
+    by = "wiki_url", relationship = "many-to-many"
+  ) |>
   group_by(url_name, prize, ynom) |>
   mutate(wikiprizes_pre = sum(wikiprizes_year < ynom, na.rm = TRUE)) |>
   filter(row_number() == 1) |>
   ungroup() |>
+  # remove additional observsation not from nominees list
+  filter(!is.na(prize)) |>
   # keep just necessary variales
   dplyr::select(
     authors, title, subti, prize, ynom, shortlist, winner, debut,
