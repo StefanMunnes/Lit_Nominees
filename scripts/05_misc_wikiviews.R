@@ -5,7 +5,7 @@ authors_prizes <- readRDS("../data/nominees_pt.RDS") |>
   select(url_name, prize, ynom)
 
 # date of nomination, prize receipt and ceremony
-dates <- read_xlsx("../data/preise_daten.xlsx") |>
+dates <- readxl::read_xlsx("../data/preise_daten.xlsx") |>
   select(!contains("Source"))
 
 # author names with wikipedia urls
@@ -37,6 +37,7 @@ wikiviews_pre_ls <- lapply(seq_len(nrow(authors_wiki_url)), function(row) {
   } else {
     end <- authors_wiki_url$shortlist_date[row]
   }
+
   start <- end %m-% months(12)
 
   message(page, " from ", start, " to ", end)

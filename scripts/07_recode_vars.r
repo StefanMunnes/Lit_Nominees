@@ -47,9 +47,11 @@ nominees_rec <- nominees |>
     language_nongerman = ifelse(str_detect(language, "foreign"), TRUE, FALSE),
     # create Zeitgeist variables
     metoo = ifelse(ynom < 2017, "Before #metoo", "After #metoo") |>
-      as.factor() |> forcats::fct_relevel(rev),
+      as.factor() |>
+      forcats::fct_relevel(rev),
     syria = ifelse(ynom < 2015, "Before 2015", "After 2015") |>
-      as.factor() |> forcats::fct_relevel(rev),
+      as.factor() |>
+      forcats::fct_relevel(rev),
     # jury gender share as groups
     jury_group = case_when(
       jury_fem < 0.5 ~ "more male",
@@ -65,6 +67,3 @@ nominees_rec <- fastDummies::dummy_cols(nominees_rec, select_columns = "prize")
 
 # Save dataset
 saveRDS(nominees_rec, file = "../data/nominees_rec.RDS")
-
-# Export to Stata
-write_dta(nominees_rec, path = "../data/nominees_rec.dta", version = 15)
