@@ -19,7 +19,7 @@ plot_groups <- list(
   c("Topics/Zeitgeist", "History", "Culture"),
   c(
     "Prominence", "# previous books (ref. median <= 5.0)",
-    "Wikipedia views (ref. median <= 8.6)"
+    "Wikipedia views (ref. median <= 8.5)"
   ),
   c("Demogr.", "Female", "Non-native German speaker")
 )

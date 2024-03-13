@@ -23,7 +23,7 @@ coef_labs <- c(
   "pub_reputation_mean_cat> median (4.4)" =
     "High publisher reputation (ref. median <= 4.4)",
   "pub_reputation_mean" = "Publisher reputation",
-  "wv_mean_cat> median (8.6)" = "Wikipedia views (ref. median <= 8.6)",
+  "wv_mean_cat> median (8.5)" = "Wikipedia views (ref. median <= 8.5)",
   "wv_mean" = "Wikipedia views",
   "topic_history" = "History",
   "topic_politics" = "Politics",
@@ -67,7 +67,7 @@ model_formulars <- c(
     female + age_nom_cat + language_nongerman +
     prize_deutscher + prize_leipziger +
     prize_oesterreich + prize_oesterreich_debuet + prize_schweiz,
-  "Continious IVs" = winner ~ debut + senti_qual_cat +
+  "Continuous IVs" = winner ~ debut + senti_qual_cat +
     revs_n +
     topic_history + topic_culture +
     topic_identity + topic_politics + topic_relations +

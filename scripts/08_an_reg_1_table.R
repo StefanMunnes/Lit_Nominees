@@ -8,7 +8,7 @@ sect_properties <- prop_section(
 # table with confidence intervall
 modelsummary(margins_log,
   stars = c("*" = .05, "**" = .01, "***" = 0.001),
-  coef_map = coef_labs,
+  coef_map = c(coef_labs, "debut" = "Debut prize"),
   estimate = "{estimate}{stars}\n({std.error})",
   statistic = NULL,
   shape = term ~ model,
@@ -24,7 +24,7 @@ modelsummary(margins_log,
   )
 
 
-# table with goodness of fit statistics to add manualy to margin tables
+# table with goodness of fit statistics to add manually to margin tables
 gm <- modelsummary::gof_map
 gm$omit <- "FALSE"
 gm$fmt[gm$raw == "r2.tjur"] <- 3
