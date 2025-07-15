@@ -41,7 +41,7 @@ plot_log <- data_log |>
     dot_args = list(size = 10, aes(shape = model)),
     model_order = names(margins_log[1:5])
   ) +
-  ggtitle("Predicting Winners by Quality") +
+  # ggtitle("Predicting Winners by Quality") +
   xlab("Average Marginal Effects") + ylab("") +
   scale_x_continuous(breaks = seq(-0.1, 0.25, 0.05)) +
   scale_color_manual(
@@ -83,7 +83,7 @@ plot_log_full_only <- data_log |>
     whisker_args = list(size = 1),
     dot_args = list(size = 7, shape = 18)
   ) +
-  ggtitle("Predicting Winners") +
+  # ggtitle("Predicting Winners") +
   xlab("Average Marginal Effects") + ylab("") +
   scale_x_continuous(breaks = seq(-0.1, 0.25, 0.05)) +
   scale_color_manual(
