@@ -9,14 +9,18 @@ nominees_rec <- nominees |>
     ),
     across(
       c(
-        revs_n, wikiprizes_pre, books_dnb_prev, pub_reputation_mean, wv_mean,
+        revs_n,
+        wikiprizes_pre,
+        books_dnb_prev,
+        pub_reputation_mean,
+        wv_mean,
         age_nom
       ),
       ~ case_when(
-        .x <= median(.x, na.rm = TRUE)
-        ~ sprintf("<= median (%.1f)", median(.x, na.rm = TRUE)),
-        .x > median(.x, na.rm = TRUE)
-        ~ sprintf("> median (%.1f)", median(.x, na.rm = TRUE))
+        .x <= median(.x, na.rm = TRUE) ~
+          sprintf("<= median (%.1f)", median(.x, na.rm = TRUE)),
+        .x > median(.x, na.rm = TRUE) ~
+          sprintf("> median (%.1f)", median(.x, na.rm = TRUE))
       ) |>
         as.factor(),
       .names = "{.col}_cat"
@@ -26,13 +30,17 @@ nominees_rec <- nominees |>
     senti_qual_cat = case_when(
       is.na(senti_mean) ~ "none",
       senti_mean <= mean(senti_mean, na.rm = TRUE) &
-        senti_vari <= mean(senti_vari, na.rm = TRUE) ~ "clearly low",
+        senti_vari <= mean(senti_vari, na.rm = TRUE) ~
+        "clearly low",
       senti_mean <= mean(senti_mean, na.rm = TRUE) &
-        senti_vari > mean(senti_vari, na.rm = TRUE) ~ "disputed low",
+        senti_vari > mean(senti_vari, na.rm = TRUE) ~
+        "disputed low",
       senti_mean > mean(senti_mean, na.rm = TRUE) &
-        senti_vari > mean(senti_vari, na.rm = TRUE) ~ "disputed high",
+        senti_vari > mean(senti_vari, na.rm = TRUE) ~
+        "disputed high",
       senti_mean > mean(senti_mean, na.rm = TRUE) &
-        senti_vari <= mean(senti_vari, na.rm = TRUE) ~ "clearly high"
+        senti_vari <= mean(senti_vari, na.rm = TRUE) ~
+        "clearly high"
     ) |>
       as.factor() |>
       relevel(ref = "clearly low"),

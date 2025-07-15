@@ -1,4 +1,6 @@
-if (!require("pacman")) install.packages("pacman")
+if (!require("pacman")) {
+  install.packages("pacman")
+}
 
 pacman::p_load(
   "readxl",
@@ -15,12 +17,20 @@ pacman::p_load(
   "httr",
   "xml2",
   "jsonlite", # fromJSON
-  "wikipediatrend", # Wikidata
+  # "wikipediatrend", # Wikidata
   "lubridate", # interval
   "stargazer",
   "haven",
-  "sandwich", "margins", "dotwhisker", "ggpubr",
-  "modelsummary", "flextable", "officer", "arsenal"
+  "sandwich",
+  "margins",
+  "dotwhisker",
+  "ggpubr",
+  "modelsummary",
+  "flextable",
+  "officer",
+  "arsenal",
+  "broom",
+  "fastDummies"
 )
 
 try(setwd("scripts/"))
@@ -35,7 +45,8 @@ clean <- function(var) {
 }
 
 cr_match_id <- function(var1, var2, len = 10) {
-  paste(var1,
+  paste(
+    var1,
     substr(clean(var2), 1, len),
     stringr::str_length(clean(var2)),
     sep = "_"
@@ -47,8 +58,6 @@ url_decode_utf <- function(x) {
   Encoding(y) <- "UTF-8"
   y
 }
-
-
 
 # source("scripts/01_prizes_xlsx.R", print.eval = T, encoding = "utf-8")
 #

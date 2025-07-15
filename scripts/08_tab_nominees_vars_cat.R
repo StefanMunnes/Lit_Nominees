@@ -23,7 +23,6 @@ levels(noms_all$pub_reputation_mean_cat) <- c("(<= median, 4.4)", "(> median, 4.
 levels(noms_all$wv_mean_cat) <- c("(<= median, 8.5)", "(> median, 8.5)")
 levels(noms_all$age_nom_cat) <- c("(<= median, 43)", "(> median, 43)")
 
-
 tableby(varlist, data = noms_all, total = FALSE, cat.simplify = TRUE) |>
   set_labels(
     list(
