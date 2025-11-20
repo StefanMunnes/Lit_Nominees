@@ -29,6 +29,8 @@ pacman::p_load(
   "flextable",
   "officer",
   "arsenal",
+  "gtsummary",
+  "gt",
   "broom",
   "fastDummies"
 )
@@ -58,13 +60,3 @@ url_decode_utf <- function(x) {
   Encoding(y) <- "UTF-8"
   y
 }
-
-# source("scripts/01_prizes_xlsx.R", print.eval = T, encoding = "utf-8")
-#
-# # run carefully: scrapes web data from perlentaucher.de with delay time
-# source("scripts/02_books_pt.R", print.eval = T, encoding = "utf-8")
-#
-# # run carefully: scrapes web data from perlentaucher.de with delay time
-# source("scripts/03_reviews_pt.R", print.eval = T, encoding = "utf-8")
-#
-# source("scripts/04_combine_data.R")

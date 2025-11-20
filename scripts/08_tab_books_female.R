@@ -1,8 +1,3 @@
-library(gtsummary)
-library(gt)
-library(flextable)
-
-
 # -- 1. Load data --
 nominees <- readRDS("../data/nominees_rec.RDS") |>
   distinct(title, .keep_all = TRUE)
@@ -15,14 +10,21 @@ table_female <- nominees |>
     female,
     senti_mean,
     revs_n,
-    books_dnb_prev, nom_prize_n, wikiprizes_pre, pub_reputation_mean, wv_mean,
-    language, age_nom
+    books_dnb_prev,
+    nom_prize_n,
+    wikiprizes_pre,
+    pub_reputation_mean,
+    wv_mean,
+    language,
+    age_nom
   ) |>
-  mutate(language = case_when(
-    language == "foreign" ~ TRUE,
-    language == "foreign+" ~ TRUE,
-    TRUE ~ FALSE
-  )) |>
+  mutate(
+    language = case_when(
+      language == "foreign" ~ TRUE,
+      language == "foreign+" ~ TRUE,
+      TRUE ~ FALSE
+    )
+  ) |>
   tbl_summary(
     # group by female
     by = female,
@@ -62,7 +64,8 @@ table_female <- nominees |>
   # Add siginficance stars
   add_significance_stars() |>
   # Modify footnote
-  modify_footnote(all_stat_cols() ~ "Mean (standard deviation in parentheses) \n Percentage for categorical variables", # nolint
+  modify_footnote(
+    all_stat_cols() ~ "Mean (standard deviation in parentheses) \n Percentage for categorical variables", # nolint
     p.value = "Paired t-test (Chi-squared test for categorical variables) \n *p<0.05; **p<0.01; ***p<0.001" # nolint
   ) |>
   # Modify header
