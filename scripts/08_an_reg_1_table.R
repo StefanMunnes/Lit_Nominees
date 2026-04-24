@@ -6,9 +6,10 @@ sect_properties <- prop_section(
 
 
 # table with confidence intervall
-modelsummary(margins_log,
+modelsummary(
+  margins_log,
   stars = c("*" = .05, "**" = .01, "***" = 0.001),
-  coef_map = c(coef_labs, "debut" = "Debut prize"),
+  coef_map = c(coef_labs),
   estimate = "{estimate}{stars}\n({std.error})",
   statistic = NULL,
   shape = term ~ model,
@@ -29,7 +30,8 @@ gm <- modelsummary::gof_map
 gm$omit <- "FALSE"
 gm$fmt[gm$raw == "r2.tjur"] <- 3
 
-modelsummary(models_log,
+modelsummary(
+  models_log,
   coef_omit = -1,
   gof_omit = "Lik|RMSE",
   gof_map = gm,
